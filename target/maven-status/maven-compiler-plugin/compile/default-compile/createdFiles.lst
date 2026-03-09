@@ -1,0 +1,6 @@
+com\fifthlab\springtasks\model\Task$TaskBuilder.class
+com\fifthlab\springtasks\model\Task.class
+com\fifthlab\springtasks\config\SecurityConfig.class
+com\fifthlab\springtasks\controller\TaskController.class
+com\fifthlab\springtasks\SpringTasksApplication.class
+com\fifthlab\springtasks\service\TaskService.class
