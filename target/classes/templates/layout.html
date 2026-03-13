@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -36,10 +36,33 @@
 
         .card {
             border: none;
-            border-radius: 1rem;
+            border-radius: 1.25rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             background: var(--bg-glass);
             backdrop-filter: blur(8px);
+            transition: transform 0.2s;
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            color: #475569 !important;
+            padding: 0.5rem 1rem !important;
+            transition: color 0.2s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: 700;
+        }
+
+        .nav-auth-btn {
+            border-radius: 0.75rem;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem !important;
         }
 
         .btn-primary {
@@ -63,6 +86,11 @@
         .glass-container {
             padding: 2rem 0;
         }
+
+        /* Prevent layout shift during auth page loading */
+        [layout\:fragment="content"] {
+            min-height: 70vh;
+        }
     </style>
 </head>
 
@@ -76,12 +104,30 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/tasks}">Dashboard</a>
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/tasks}">
+                            <i class="bi bi-grid-1x2-fill me-1"></i> Dashboard
+                        </a>
                     </li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="btn btn-primary btn-sm" th:href="@{/tasks/new}">Add Task</a>
+                    <li class="nav-item" sec:authorize="isAnonymous()">
+                        <a class="nav-link" th:href="@{/login}">Login</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAnonymous()">
+                        <a class="btn btn-outline-primary btn-sm nav-auth-btn ms-lg-2" th:href="@{/signup}">Sign Up</a>
+                    </li>
+                    <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated()">
+                        <a class="btn btn-primary btn-sm nav-auth-btn" th:href="@{/tasks/new}">
+                            <i class="bi bi-plus-lg me-1"></i> Add Task
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-3" sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" class="m-0">
+                            <button type="submit" class="btn btn-link nav-link border-0 p-0 text-danger"
+                                style="text-decoration: none;">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </div>

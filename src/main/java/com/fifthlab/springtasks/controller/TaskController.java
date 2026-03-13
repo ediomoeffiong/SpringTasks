@@ -68,4 +68,14 @@ public class TaskController {
         taskService.toggleStatus(id);
         return "redirect:/tasks";
     }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/signup")
+    public String signup() {
+        return "signup";
+    }
 }
