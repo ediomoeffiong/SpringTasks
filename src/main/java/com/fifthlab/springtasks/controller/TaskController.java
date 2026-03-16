@@ -78,4 +78,10 @@ public class TaskController {
     public String signup() {
         return "signup";
     }
+
+    @PostMapping("/signup")
+    public String registerUser() {
+        // Mock registration: redirect to login with success message
+        return "redirect:/login?signupSuccess";
+    }
 }
