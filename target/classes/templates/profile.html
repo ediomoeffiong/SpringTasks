@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>User Profile</title>
+    <style>
+        .profile-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1rem 0 3rem;
+        }
+
+        /* Reusable Card Style matching Dashboard */
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header-styled {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header-styled i {
+            color: var(--primary-color);
+        }
+
+        .card-body-styled {
+            padding: 1.5rem;
+        }
+
+        /* Profile Banner & Header */
+        .profile-banner {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            height: 140px;
+            position: relative;
+        }
+
+        .profile-header-content {
+            padding: 0 2rem 2rem;
+            display: flex;
+            align-items: flex-end;
+            margin-top: -60px;
+            position: relative;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .profile-avatar-wrapper {
+            position: relative;
+            border: 4px solid #f8fafc;
+            border-radius: 50%;
+            background: #ffffff;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .profile-avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 3rem;
+            font-weight: 800;
+        }
+
+        .profile-user-info {
+            flex: 1;
+            min-width: 250px;
+            padding-top: 70px;
+            /* offset for flex-end alignment under banner */
+        }
+
+        .profile-name {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .profile-username {
+            font-size: 1rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-bio {
+            color: #475569;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            max-width: 600px;
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: 1.5rem;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-self: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+
+        /* Profile Info Panel */
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .info-item:first-child {
+            padding-top: 0;
+        }
+
+        .info-item:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            color: #1e293b;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-value i {
+            color: #94a3b8;
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .icon-blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .icon-green {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .icon-orange {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+
+        .icon-purple {
+            background: rgba(168, 85, 247, 0.1);
+            color: #a855f7;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+        }
+
+        /* Activity Timeline */
+        .activity-feed {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .activity-feed::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 7px;
+            width: 2px;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+
+        .activity-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .activity-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .activity-marker {
+            position: absolute;
+            left: -1.5rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 0 4px #ffffff;
+            z-index: 1;
+        }
+
+        .activity-marker.create {
+            border-color: #3b82f6;
+        }
+
+        .activity-marker.complete {
+            border-color: #22c55e;
+        }
+
+        .activity-marker.update {
+            border-color: #f59e0b;
+        }
+
+        .activity-content {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .activity-text {
+            color: #1e293b;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .activity-text strong {
+            color: var(--primary-color);
+        }
+
+        .activity-time {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Modal styling overrides to match settings */
+        .modal-content {
+            border-radius: 1.25rem;
+            border: none;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        /* Responsive Tweaks */
+        @media (max-width: 767.98px) {
+            .profile-header-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                margin-top: -60px;
+                padding-top: 0;
+            }
+
+            .profile-user-info {
+                padding-top: 1rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .profile-meta {
+                justify-content: center;
+            }
+
+            .profile-actions {
+                width: 100%;
+                justify-content: center;
+                align-self: center;
+                margin-bottom: 0;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="profile-container">
+
+            <!-- Main Profile Header Card -->
+            <div class="glass-card mb-4">
+                <div class="profile-banner"></div>
+                <div class="profile-header-content">
+                    <div class="profile-avatar-wrapper">
+                        <!-- Placeholder Initials -->
+                        <div class="profile-avatar-placeholder">JD</div>
+                    </div>
+
+                    <div class="profile-user-info">
+                        <h1 class="profile-name">Covenant</h1>
+                        <div class="profile-username">@uniquecovenant</div>
+                        <p class="profile-bio">Software Developer | Task Management Enthusiast | Building awesome things
+                            with Spring Boot and UI magic.</p>
+
+                        <div class="profile-meta">
+                            <span><i class="bi bi-geo-alt-fill me-1"></i> Lagos, NG</span>
+                            <span><i class="bi bi-calendar3 me-1"></i> Joined March 2026</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#editProfileModal">
+                            <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Grid 4-8 Split -->
+            <div class="row g-4">
+
+                <!-- Left Column: Personal Info -->
+                <div class="col-lg-4">
+                    <div class="glass-card h-100 mb-0">
+                        <div class="card-header-styled">
+                            <i class="bi bi-person-lines-fill"></i> Profile Information
+                        </div>
+                        <div class="card-body-styled">
+                            <ul class="info-list">
+                                <li class="info-item">
+                                    <span class="info-label">Full Name</span>
+                                    <span class="info-value">Covenant</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-label">Username</span>
+                                    <span class="info-value">@uniquecovenant</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-label">Email Address</span>
+                                    <span class="info-value"><i class="bi bi-envelope"></i> covenant@gmail.com</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-label">Location</span>
+                                    <span class="info-value"><i class="bi bi-globe-americas"></i> Lagos,
+                                        NG</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-label">About</span>
+                                    <span class="info-value text-muted" style="font-size: 0.9rem;">Software Developer |
+                                        Task Management Enthusiast | Building awesome things with Spring Boot and UI
+                                        magic.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Stats & Activity -->
+                <div class="col-lg-8">
+
+                    <!-- Stats Dashboard Row -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6 col-xl-3">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <h3 class="stat-title">Total Tasks</h3>
+                                    <div class="stat-icon icon-blue"><i class="bi bi-collection"></i></div>
+                                </div>
+                                <div class="stat-value">148</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <h3 class="stat-title">Completed</h3>
+                                    <div class="stat-icon icon-green"><i class="bi bi-check-circle"></i></div>
+                                </div>
+                                <div class="stat-value">112</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <h3 class="stat-title">Pending</h3>
+                                    <div class="stat-icon icon-orange"><i class="bi bi-hourglass-split"></i></div>
+                                </div>
+                                <div class="stat-value">36</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <h3 class="stat-title">Success Rate</h3>
+                                    <div class="stat-icon icon-purple"><i class="bi bi-graph-up-arrow"></i></div>
+                                </div>
+                                <div class="stat-value">75%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Feed -->
+                    <div class="glass-card mb-0">
+                        <div class="card-header-styled">
+                            <i class="bi bi-activity"></i> Recent Activity
+                        </div>
+                        <div class="card-body-styled">
+                            <div class="activity-feed">
+
+                                <div class="activity-item">
+                                    <div class="activity-marker complete"></div>
+                                    <div class="activity-content">
+                                        <div class="activity-text">Completed the task <strong>"Review Frontend
+                                                Layouts"</strong></div>
+                                        <div class="activity-time"><i class="bi bi-clock"></i> 2 hours ago</div>
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-marker create"></div>
+                                    <div class="activity-content">
+                                        <div class="activity-text">Created a new task <strong>"Implement User Profile
+                                                UI"</strong></div>
+                                        <div class="activity-time"><i class="bi bi-clock"></i> 5 hours ago</div>
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-marker update"></div>
+                                    <div class="activity-content">
+                                        <div class="activity-text">Updated details for task <strong>"Fix Settings
+                                                Routing Issue"</strong></div>
+                                        <div class="activity-time"><i class="bi bi-clock"></i> Yesterday</div>
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-marker complete"></div>
+                                    <div class="activity-content">
+                                        <div class="activity-text">Completed the task <strong>"Integrate Bootstrap
+                                                Modals"</strong></div>
+                                        <div class="activity-time"><i class="bi bi-clock"></i> Mar 14, 2026</div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button class="btn btn-link text-muted text-decoration-none fw-bold">Load More
+                                    Activity</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                        <h5 class="modal-title fw-bold" id="editProfileModalLabel">
+                            <i class="bi bi-pencil-square me-2 text-primary"></i>Edit Profile
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form action="#"
+                        onsubmit="event.preventDefault(); alert('Profile update simulation triggered.'); document.querySelector('#editProfileModal .btn-close').click();">
+                        <div class="modal-body p-4">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="editFullName" class="form-label fw-bold text-secondary mb-1">Full
+                                        Name</label>
+                                    <input type="text" class="form-control bg-light" id="editFullName" value="John Doe"
+                                        required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editUsername"
+                                        class="form-label fw-bold text-secondary mb-1">Username</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0 text-muted">@</span>
+                                        <input type="text" class="form-control border-start-0 ps-0 bg-light"
+                                            id="editUsername" value="johndoe" required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="editLocation"
+                                        class="form-label fw-bold text-secondary mb-1">Location</label>
+                                    <input type="text" class="form-control bg-light" id="editLocation"
+                                        value="San Francisco, CA" placeholder="e.g. New York, USA">
+                                </div>
+                                <div class="col-12">
+                                    <label for="editBio" class="form-label fw-bold text-secondary mb-1">Bio</label>
+                                    <textarea class="form-control bg-light" id="editBio" rows="4"
+                                        placeholder="Tell us a little about yourself...">Software Developer | Task Management Enthusiast | Building awesome things with Spring Boot and UI magic.</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+                            <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary fw-bold">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

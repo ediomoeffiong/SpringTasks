@@ -1,0 +1,17 @@
+package com.fifthlab.springtasks.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.servlet.http.HttpServletRequest;
+
+@Controller
+public class ProfileController {
+
+    @GetMapping("/profile")
+    public String showProfilePage(Model model, HttpServletRequest request) {
+        // Expose current URI to layout for active state
+        model.addAttribute("currentUri", request.getRequestURI());
+        return "profile";
+    }
+}
