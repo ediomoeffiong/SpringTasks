@@ -20,6 +20,36 @@ public class TaskController {
         return "index";
     }
 
+    @GetMapping("/dashboard")
+    public String dashboardOverview(Model model) {
+        return "dashboard-overview";
+    }
+
+    @GetMapping("/my-tasks")
+    public String myTasks(Model model) {
+        return "my-tasks";
+    }
+
+    @GetMapping("/calendar")
+    public String calendar(Model model) {
+        return "calendar";
+    }
+
+    @GetMapping("/categories")
+    public String categories(Model model) {
+        return "categories";
+    }
+
+    @GetMapping("/analytics")
+    public String analytics(Model model) {
+        return "analytics";
+    }
+
+    @GetMapping("/notifications")
+    public String notifications(Model model) {
+        return "notifications";
+    }
+
     @GetMapping("/tasks")
     public String dashboard(@RequestParam(required = false) String status, Model model) {
         Boolean completed = null;

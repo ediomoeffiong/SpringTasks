@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>Notifications Center</title>
+    <style>
+        /* Modern Dark/Glass Theme Classes */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .workspace-header {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+            border-radius: 1rem;
+            padding: 2rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Notification Item styling */
+        .notification-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        
+        .notification-item.unread {
+            background: rgba(99, 102, 241, 0.08); /* slight indigo tint */
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .notification-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .notification-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--primary-color);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Hover Actions */
+        .quick-actions {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .notification-item:hover .quick-actions {
+            opacity: 1;
+        }
+
+        /* Checkbox Styling */
+        .custom-checkbox .form-check-input {
+            background-color: transparent;
+            border-color: rgba(255,255,255,0.3);
+            cursor: pointer;
+        }
+        .custom-checkbox .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Icon Types */
+        .icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .type-created { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+        .type-completed { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+        .type-overdue { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .type-system { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .type-reminder { background: rgba(250, 204, 21, 0.15); color: #facc15; }
+
+        /* Bulk Actions Bar */
+        .bulk-actions-bar {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 2rem;
+            padding: 1rem 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1050;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .bulk-actions-bar.visible {
+            bottom: 30px;
+        }
+
+        /* Date Group Header */
+        .date-group-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: #64748b;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 0.5rem;
+        }
+        .date-group-header:first-child {
+            margin-top: 0;
+        }
+
+        /* Navigation Tabs Overlay overrides */
+        .nav-pills .nav-link {
+            color: #94a3b8;
+            border-radius: 2rem;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.2s;
+        }
+        .nav-pills .nav-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+        .nav-pills .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Modals */
+        .glass-modal .modal-content {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 1.5rem;
+        }
+        .glass-modal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        /* Badge overlay */
+        .badge-counter {
+            font-size: 0.65rem;
+            padding: 0.25em 0.6em;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content" class="pb-5">
+        
+        <!-- 1. Header -->
+        <div class="workspace-header mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4">
+            <div>
+                <h2 class="fw-bold mb-2 text-primary"><i class="bi bi-bell me-2"></i>Notifications</h2>
+                <p class="text-muted mb-0" >Stay updated with your task activities and system alerts.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-outline-light rounded-pill px-4 shadow-sm" style="border-color: rgba(255,255,255,0.2);" onclick="markAllAsRead()">
+                    <i class="bi bi-check2-all me-1"></i> Mark All Read
+                </button>
+                <button class="btn btn-outline-danger rounded-pill px-4 shadow-sm" style="border-color: rgba(248, 113, 113, 0.2);" onclick="clearAllNotifications()">
+                    <i class="bi bi-trash me-1"></i> Clear All
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-xl-10 mx-auto">
+                <div class="glass-card p-3 p-md-4">
+                    
+                    <!-- 2. Filters & Tabs -->
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                        <ul class="nav nav-pills" id="notificationTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="setFilter('all', event)">All</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="setFilter('unread', event)">
+                                    Unread <span class="badge bg-primary rounded-pill badge-counter" id="unreadCountBadge">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="setFilter('read', event)">Read</a>
+                            </li>
+                        </ul>
+                        
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="text-muted small" id="totalCountText">0 items</span>
+                        </div>
+                    </div>
+
+                    <!-- Select All Master Checkbox -->
+                    <div class="d-flex align-items-center px-3 mb-3 custom-checkbox" id="selectAllContainer">
+                        <input class="form-check-input me-3" type="checkbox" id="masterCheckbox" onclick="toggleSelectAll()">
+                        <label class="form-check-label text-muted small fw-bold text-uppercase" for="masterCheckbox" style="letter-spacing: 0.05em; cursor: pointer;">
+                            Select / Deselect All
+                        </label>
+                    </div>
+
+                    <!-- 3. Notifications List Area -->
+                    <div id="notificationsContainer">
+                        <!-- Filled by JS -->
+                    </div>
+
+                    <!-- 8. Empty State -->
+                    <div id="emptyState" class="text-center py-5 d-none">
+                        <i class="bi bi-bell-slash text-muted display-1  mb-3"></i>
+                        <h4 class="text-primary">All caught up!</h4>
+                        <p class="text-muted">You have no notifications in this view.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 6. Bulk Actions Floating Bar -->
+        <div class="bulk-actions-bar" id="bulkActionsBar">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" id="selectedCount">In</span>
+                <span class="text-primary fw-bold">Selected</span>
+            </div>
+            <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.2);"></div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="bulkMarkRead()">
+                    <i class="bi bi-envelope-open me-1"></i> Mark as Read
+                </button>
+                <button class="btn btn-sm btn-danger rounded-pill px-3 shadow" onclick="bulkDelete()">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+                <button class="btn btn-sm btn-link text-muted text-decoration-none rounded-pill ms-1" onclick="clearSelection()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+
+        <!-- 7. Notification Details Modal -->
+        <div class="modal fade glass-modal" id="notificationDetailsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-start border-0">
+                    <div class="modal-header border-bottom border-light border-opacity-10 pb-3">
+                        <div class="d-flex flex-column w-100">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="icon-wrapper" id="detailIconWrapper">
+                                    <i class="bi fs-5" id="detailIcon"></i>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <h4 class="modal-title fw-bold text-primary mb-1" id="detailTitle">Notification Title</h4>
+                            <div class="text-secondary small" id="detailTimestamp">2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="modal-body custom-scrollbar text-primary pt-4 pb-4">
+                        <p id="detailMessage" class="mb-0" style="line-height: 1.6; font-size: 1.05rem;">Message payload goes here.</p>
+                        
+                        <div id="detailExtraArea" class="mt-4 p-3 rounded-3 d-none" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                            <h6 class="text-muted small fw-bold text-uppercase mb-2" style="letter-spacing: 0.05em;">Related Task Info</h6>
+                            <p class="text-primary mb-1 fw-bold" id="detailTaskTarget">Task Title Here</p>
+                            <a href="/my-tasks" class="btn btn-sm btn-link p-0 text-decoration-none"><i class="bi bi-box-arrow-up-right me-1"></i>Go to Task</a>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-light border-opacity-10 py-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="deleteCurrentNotification()">
+                            <i class="bi bi-trash me-1"></i> Delete
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-4" data-bs-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Javascript Data & Logic -->
+        <script>
+            // State
+            let currentFilter = 'all'; // all, unread, read
+            let selectedIds = new Set();
+            let viewingNotificationId = null;
+
+            // Mock Data
+            const todayRaw = new Date();
+            const todayStr = todayRaw.toISOString().split('T')[0];
+            const yesterdayRaw = new Date(todayRaw);
+            yesterdayRaw.setDate(todayRaw.getDate() - 1);
+            const yesterdayStr = yesterdayRaw.toISOString().split('T')[0];
+            const oldRaw = new Date(todayRaw);
+            oldRaw.setDate(todayRaw.getDate() - 4);
+            const oldStr = oldRaw.toISOString().split('T')[0];
+
+            let mockNotifications = [
+                { id: 1, type: 'completed', title: 'Task Completed!', message: 'You successfully completed the "Launch Q2 Campaign" task.', timestamp: '10 mins ago', dateGroup: todayStr, unread: true, relatedTask: 'Launch Q2 Campaign' },
+                { id: 2, type: 'overdue', title: 'Task Overdue', message: 'The task "Submit Expense Reports" was due yesterday and is now overdue.', timestamp: '3 hours ago', dateGroup: todayStr, unread: true, relatedTask: 'Submit Expense Reports' },
+                { id: 3, type: 'reminder', title: 'Upcoming Deadline', message: 'Reminder: "Client Feedback Call" is due in 2 hours. Be prepared!', timestamp: '5 hours ago', dateGroup: todayStr, unread: false, relatedTask: 'Client Feedback Call' },
+                { id: 4, type: 'created', title: 'New Task Assigned', message: 'Admin assigned a new task: "Update Dashboard Analytics" to your board.', timestamp: 'Yesterday at 2:00 PM', dateGroup: yesterdayStr, unread: false, relatedTask: 'Update Dashboard Analytics' },
+                { id: 5, type: 'system', title: 'System Maintenance', message: 'The servers will undergo scheduled maintenance tonight at 2:00 AM UTC. Expect 15 mins of downtime.', timestamp: 'Yesterday at 9:00 AM', dateGroup: yesterdayStr, unread: false, relatedTask: null },
+                { id: 6, type: 'completed', title: 'Milestone Reached', message: 'You unlocked the "Productivity Guru" badge for completing 50 tasks this month.', timestamp: 'Last Week', dateGroup: oldStr, unread: false, relatedTask: null },
+            ];
+
+            let detailsModal;
+
+            document.addEventListener('DOMContentLoaded', () => {
+                detailsModal = new bootstrap.Modal(document.getElementById('notificationDetailsModal'));
+                
+                // Init load
+                renderNotifications();
+            });
+
+            // --- Renders ---
+            function renderNotifications() {
+                const container = document.getElementById('notificationsContainer');
+                const empty = document.getElementById('emptyState');
+                const masterCheck = document.getElementById('masterCheckbox');
+                
+                // Filter
+                let filtered = mockNotifications.filter(n => {
+                    if (currentFilter === 'unread') return n.unread;
+                    if (currentFilter === 'read') return !n.unread;
+                    return true;
+                });
+
+                // Update Badges & Texts
+                const unreadTotal = mockNotifications.filter(n=>n.unread).length;
+                document.getElementById('unreadCountBadge').innerText = unreadTotal;
+                if(unreadTotal === 0) document.getElementById('unreadCountBadge').classList.add('bg-secondary', 'bg-');
+                else document.getElementById('unreadCountBadge').classList.remove('bg-secondary', 'bg-');
+                
+                document.getElementById('totalCountText').innerText = `${filtered.length} item${filtered.length!==1?'s':''}`;
+
+                // Sync Master checkbox
+                if (filtered.length === 0) {
+                    masterCheck.checked = false;
+                    masterCheck.disabled = true;
+                    container.innerHTML = '';
+                    empty.classList.remove('d-none');
+                    return;
+                } else {
+                    masterCheck.disabled = false;
+                    empty.classList.add('d-none');
+                    // Check if all visible are selected
+                    masterCheck.checked = selectedIds.size > 0 && filtered.every(n => selectedIds.has(n.id));
+                }
+
+                // Group logically by dateGroup
+                const groups = {};
+                filtered.forEach(n => {
+                    if(!groups[n.dateGroup]) groups[n.dateGroup] = [];
+                    groups[n.dateGroup].push(n);
+                });
+
+                // Sort groups descending (Today first)
+                const sortedGroups = Object.keys(groups).sort((a,b) => new Date(b) - new Date(a));
+
+                let html = '';
+                sortedGroups.forEach(dateKey => {
+                    let headerLabel = dateKey;
+                    if(dateKey === todayStr) headerLabel = "Today";
+                    else if(dateKey === yesterdayStr) headerLabel = "Yesterday";
+                    else headerLabel = "Earlier";
+
+                    html += `<div class="date-group-header">${headerLabel}</div>`;
+
+                    groups[dateKey].forEach(n => {
+                        
+                        // Setup mapping logic for visual types
+                        let iconMapping = getMappingForType(n.type);
+                        let isChecked = selectedIds.has(n.id) ? 'checked' : '';
+                        let unreadClass = n.unread ? 'unread' : '';
+
+                        html += `
+                            <div class="notification-item ${unreadClass} d-flex align-items-center gap-3" onclick="openDetails(${n.id}, event)">
+                                
+                                <div class="custom-checkbox" onclick="event.stopPropagation()">
+                                    <input class="form-check-input" type="checkbox" id="chk-${n.id}" ${isChecked} onchange="toggleSelect(${n.id})">
+                                </div>
+                                
+                                <div class="icon-wrapper ${iconMapping.colorClass}">
+                                    <i class="bi ${iconMapping.icon} fs-5"></i>
+                                </div>
+
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                        <h6 class="text-primary fw-bold mb-0 text-truncate" style="font-size: 0.95rem;">${n.title}</h6>
+                                        <span class="text-secondary ms-2 text-nowrap" style="font-size: 0.70rem;">${n.timestamp}</span>
+                                    </div>
+                                    <p class="text-muted mb-0 text-truncate" style="font-size: 0.85rem;">${n.message}</p>
+                                </div>
+
+                                <div class="d-flex gap-2 quick-actions ms-2" onclick="event.stopPropagation()">
+                                    ${n.unread 
+                                        ? `<button class="btn btn-sm btn-icon rounded-circle btn-outline-secondary border-0" title="Mark as Read" onclick="markAsRead(${n.id})"><i class="bi bi-envelope-open text-primary"></i></button>`
+                                        : `<button class="btn btn-sm btn-icon rounded-circle btn-outline-secondary border-0" title="Mark as Unread" onclick="markAsUnread(${n.id})"><i class="bi bi-envelope text-muted"></i></button>`
+                                    }
+                                    <button class="btn btn-sm btn-icon rounded-circle btn-outline-secondary border-0" title="Delete" onclick="deleteNotification(${n.id})">
+                                        <i class="bi bi-trash text-danger"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                });
+
+                container.innerHTML = html;
+                updateBulkActionsBar();
+            }
+
+            function getMappingForType(type) {
+                switch(type) {
+                    case 'completed': return { icon: 'bi-check2-circle', colorClass: 'type-completed' };
+                    case 'overdue': return { icon: 'bi-exclamation-circle', colorClass: 'type-overdue' };
+                    case 'created': return { icon: 'bi-plus-circle', colorClass: 'type-created' };
+                    case 'reminder': return { icon: 'bi-alarm', colorClass: 'type-reminder' };
+                    case 'system': return { icon: 'bi-info-circle', colorClass: 'type-system' };
+                    default: return { icon: 'bi-bell', colorClass: 'type-system' };
+                }
+            }
+
+            // --- Interactions ---
+
+            function setFilter(filterType, event) {
+                event.preventDefault();
+                currentFilter = filterType;
+                
+                // Update active tab visuals
+                const links = document.querySelectorAll('#notificationTabs .nav-link');
+                links.forEach(l => l.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+
+                clearSelection();
+                renderNotifications();
+            }
+
+            function markAsRead(id) {
+                const n = mockNotifications.find(n => n.id === id);
+                if(n) n.unread = false;
+                renderNotifications();
+            }
+
+            function markAsUnread(id) {
+                const n = mockNotifications.find(n => n.id === id);
+                if(n) n.unread = true;
+                renderNotifications();
+            }
+
+            function deleteNotification(id) {
+                mockNotifications = mockNotifications.filter(n => n.id !== id);
+                selectedIds.delete(id);
+                renderNotifications();
+            }
+
+            function markAllAsRead() {
+                mockNotifications.forEach(n => n.unread = false);
+                renderNotifications();
+            }
+
+            function clearAllNotifications() {
+                if(confirm('Are you sure you want to permanently delete all notifications?')) {
+                    mockNotifications = [];
+                    clearSelection();
+                    renderNotifications();
+                }
+            }
+
+            // --- Selection & Bulk Actions ---
+
+            function toggleSelect(id) {
+                if (selectedIds.has(id)) {
+                    selectedIds.delete(id);
+                } else {
+                    selectedIds.add(id);
+                }
+                renderNotifications();
+            }
+
+            function toggleSelectAll() {
+                const masterCheck = document.getElementById('masterCheckbox');
+                
+                let visibleItems = mockNotifications.filter(n => {
+                    if (currentFilter === 'unread') return n.unread;
+                    if (currentFilter === 'read') return !n.unread;
+                    return true;
+                });
+
+                if (masterCheck.checked) {
+                    visibleItems.forEach(n => selectedIds.add(n.id));
+                } else {
+                    selectedIds.clear();
+                }
+                renderNotifications();
+            }
+
+            function clearSelection() {
+                selectedIds.clear();
+                renderNotifications();
+            }
+
+            function updateBulkActionsBar() {
+                const bar = document.getElementById('bulkActionsBar');
+                const cnt = document.getElementById('selectedCount');
+                if (selectedIds.size > 0) {
+                    cnt.innerText = selectedIds.size;
+                    bar.classList.add('visible');
+                } else {
+                    bar.classList.remove('visible');
+                }
+            }
+
+            function bulkMarkRead() {
+                mockNotifications.forEach(n => {
+                    if(selectedIds.has(n.id)) n.unread = false;
+                });
+                clearSelection();
+            }
+
+            function bulkDelete() {
+                if(confirm(`Delete ${selectedIds.size} selected items?`)) {
+                    mockNotifications = mockNotifications.filter(n => !selectedIds.has(n.id));
+                    clearSelection();
+                }
+            }
+
+            // --- Details Modal ---
+
+            function openDetails(id, event) {
+                // Ignore if clicked on a button/checkbox inside the item
+                if(event.target.tagName === 'INPUT' || event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
+
+                viewingNotificationId = id;
+                const n = mockNotifications.find(x => x.id === id);
+                if(!n) return;
+
+                // Auto-mark as read on open
+                if(n.unread) {
+                    n.unread = false;
+                    renderNotifications(); // silent re-render behind modal
+                }
+
+                // Populate mapping
+                let mapping = getMappingForType(n.type);
+                const iw = document.getElementById('detailIconWrapper');
+                iw.className = `icon-wrapper ${mapping.colorClass}`;
+                document.getElementById('detailIcon').className = `bi ${mapping.icon} fs-4`;
+                
+                document.getElementById('detailTitle').innerText = n.title;
+                document.getElementById('detailTimestamp').innerText = n.timestamp;
+                document.getElementById('detailMessage').innerText = n.message;
+
+                const extraArea = document.getElementById('detailExtraArea');
+                if(n.relatedTask) {
+                    extraArea.classList.remove('d-none');
+                    document.getElementById('detailTaskTarget').innerText = n.relatedTask;
+                } else {
+                    extraArea.classList.add('d-none');
+                }
+
+                detailsModal.show();
+            }
+
+            function deleteCurrentNotification() {
+                if(viewingNotificationId) {
+                    deleteNotification(viewingNotificationId);
+                    detailsModal.hide();
+                }
+            }
+
+        </script>
+    </div>
+</body>
+</html>

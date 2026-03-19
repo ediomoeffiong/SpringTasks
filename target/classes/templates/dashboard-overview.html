@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>Dashboard Overview</title>
+    <style>
+        /* Specific Dashboard Styles */
+        .stat-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255,255,255,0.1) !important;
+        }
+        
+        .task-item {
+            border: 1px solid transparent;
+        }
+        .task-item:hover {
+            border-color: rgba(255,255,255,0.1) !important;
+            background: rgba(255,255,255,0.05) !important;
+        }
+        .task-item:hover .task-actions {
+            opacity: 1 !important;
+        }
+
+        .quick-action-card {
+            border-radius: 1rem;
+        }
+        .quick-action-card:hover {
+            background: rgba(255,255,255,0.08) !important;
+            transform: translateY(-3px);
+            border-color: rgba(79, 70, 229, 0.4) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        
+        <!-- Dashboard Header -->
+        <div th:replace="~{fragments/dashboard-components :: header(userName='Alex')}"></div>
+
+        <!-- 4 Summary Stats Cards -->
+        <div th:replace="~{fragments/dashboard-components :: statsRow}"></div>
+
+        <!-- Main Dashboard Content Grid -->
+        <div class="row g-4 pt-2">
+            
+            <!-- Left Column (Wider on Desktop) -->
+            <div class="col-12 col-xl-8">
+                <!-- Today's Tasks -->
+                <div th:replace="~{fragments/dashboard-components :: todaysTasks}"></div>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <!-- Task Progress -->
+                        <div th:replace="~{fragments/dashboard-components :: taskProgress}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Recent Tasks -->
+                        <div th:replace="~{fragments/dashboard-components :: recentTasks}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column (Sidebar context on Desktop) -->
+            <div class="col-12 col-xl-4 d-flex flex-column gap-4">
+                <!-- Quick Actions -->
+                <div th:replace="~{fragments/dashboard-components :: quickActions}"></div>
+
+                <!-- Activity Feed -->
+                <div class="flex-grow-1">
+                    <div th:replace="~{fragments/dashboard-components :: activityFeed}"></div>
+                </div>
+            </div>
+
+        </div>
+        
+    </div>
+</body>
+
+</html>

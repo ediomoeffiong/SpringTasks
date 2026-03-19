@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>My Tasks Workspace</title>
+    <style>
+        /* Modern Dark/Glass Theme Classes */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .workspace-header {
+            background: linear-gradient(to right, rgba(79, 70, 229, 0.1), transparent);
+            border-radius: 1rem;
+            padding: 2rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Task List/Table Styles */
+        .task-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .task-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .task-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Task Card Styles for Grid View */
+        .task-card-item {
+            cursor: pointer;
+        }
+        .task-card-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Checkbox Styling */
+        .custom-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            background-color: transparent;
+            border: 2px solid #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .custom-checkbox:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Floating Bulk Actions Bar */
+        .bulk-actions-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translate(-50%, 150%);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .bulk-actions-bar.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Filters Bar */
+        .filter-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .filter-btn.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Custom Scrollbar for Modal/Drawer */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        /* Modal Styles */
+        .glass-modal .modal-content {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 1.5rem;
+        }
+        .glass-modal .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        
+        /* Skeleton Animation */
+        @keyframes shine {
+            to {
+                background-position-x: -200%;
+            }
+        }
+        .skeleton {
+            background: linear-gradient(110deg, rgba(255, 255, 255, 0.05) 8%, rgba(255, 255, 255, 0.1) 18%, rgba(255, 255, 255, 0.05) 33%);
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        
+        <!-- 1. Tasks Header -->
+        <div class="workspace-header mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4">
+            <div>
+                <h2 class="fw-bold mb-2 text-primary"><i class="bi bi-stack me-2"></i>My Tasks</h2>
+                <p class="text-muted mb-0" >Manage, organize, and track all your tasks in one unified workspace.</p>
+            </div>
+            <div class="d-flex align-items-center gap-3 w-100 w-md-auto">
+                <div class="input-group" style="max-width: 300px;">
+                    <span class="input-group-text bg-transparent border-0 text-muted ps-3 position-absolute z-3" style="top: 50%; transform: translateY(-50%);">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control rounded-pill ps-5 py-2 text-primary" 
+                           placeholder="Search tasks..." 
+                           style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                </div>
+                <button class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap" onclick="openCreateModal()">
+                    <i class="bi bi-plus-lg me-1"></i> New Task
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. Filters & Controls Bar -->
+        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-start align-items-xl-center gap-3 mb-4 p-3 glass-card">
+            
+            <div class="d-flex flex-wrap align-items-center gap-2" id="filterContainer">
+                <button class="filter-btn active" data-filter="all">All Tasks</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+                <button class="filter-btn" data-filter="overdue">Overdue <span class="badge bg-danger rounded-pill ms-1">2</span></button>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 ms-auto w-100 w-xl-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="text-muted small mb-0 text-nowrap">Sort by:</label>
+                    <select id="sortSelect" class="form-select form-select-sm bg-transparent text-primary border-secondary rounded-pill shadow-none" style="min-width: 140px;">
+                        <option value="dueDate" class="text-dark">Due Date</option>
+                        <option value="createdDate" class="text-dark">Created Date</option>
+                        <option value="priority" class="text-dark">Priority</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group bg-dark rounded-pill p-1" style="border: 1px solid rgba(255,255,255,0.1);">
+                    <button class="btn btn-sm text-primary px-3 rounded-pill active-view" id="btnListView" onclick="setViewMode('list')" style="background: rgba(255,255,255,0.1);">
+                        <i class="bi bi-list-ul"></i>
+                    </button>
+                    <button class="btn btn-sm text-muted px-3 rounded-pill" id="btnGridView" onclick="setViewMode('grid')">
+                        <i class="bi bi-grid"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 & 4. Task Container (List / Grid) -->
+        <!-- Skeletons loading state initially -->
+        <div id="loadingSkeletons">
+            <div class="glass-card mb-3 p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3 w-50">
+                        <div class="skeleton" style="width: 20px; height: 20px;"></div>
+                        <div class="skeleton" style="width: 100%; height: 20px;"></div>
+                    </div>
+                    <div class="skeleton" style="width: 15%; height: 20px;"></div>
+                    <div class="skeleton" style="width: 10%; height: 20px;"></div>
+                </div>
+            </div>
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3 w-50">
+                        <div class="skeleton" style="width: 20px; height: 20px;"></div>
+                        <div class="skeleton" style="width: 80%; height: 20px;"></div>
+                    </div>
+                    <div class="skeleton" style="width: 15%; height: 20px;"></div>
+                    <div class="skeleton" style="width: 10%; height: 20px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div id="tasksContainer" class="d-none">
+            <!-- Rendered via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-5 d-none glass-card">
+            <i class="bi bi-inbox-fill text-muted display-1  mb-3"></i>
+            <h4 class="text-primary">No tasks found</h4>
+            <p class="text-muted">You haven't created any tasks that match these filters.</p>
+            <button class="btn btn-primary rounded-pill mt-2 px-4" onclick="openCreateModal()">Create Task</button>
+        </div>
+
+        <!-- 9. Pagination Placeholder -->
+        <div id="paginationContainer" class="d-flex justify-content-center mt-4 d-none">
+            <nav aria-label="Task pagination">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link bg-transparent border-secondary text-muted rounded-start-pill" href="#">Previous</a></li>
+                    <li class="page-item active"><a class="page-link border-primary bg-primary text-white" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link bg-transparent border-secondary text-primary" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link bg-transparent border-secondary text-primary rounded-end-pill" href="#">Next</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- 5. Bulk Actions Bar -->
+        <div id="bulkActionsBar" class="bulk-actions-bar">
+            <div class="d-flex align-items-center gap-2 border-end border-secondary pe-3">
+                <span class="badge bg-primary rounded-pill" id="selectedCount">0</span>
+                <span class="text-primary fw-medium">tasks selected</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="bulkMarkCompleted()">
+                    <i class="bi bi-check2-all me-1"></i> Mark Completed
+                </button>
+                <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="bulkDelete()">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+            </div>
+            <button class="btn-close btn-close-white ms-2" style="font-size: 0.75rem;" onclick="clearSelection()"></button>
+        </div>
+
+        <!-- 6. Task Details Drawer/Modal -->
+        <div class="modal fade glass-modal" id="taskDetailsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content text-start border-0">
+                    <div class="modal-header border-bottom border-light border-opacity-10 pb-3">
+                        <div class="d-flex flex-column w-100">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span id="detailStatus" class="badge"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <h4 class="modal-title fw-bold text-primary mb-1" id="detailTitle">Task Title</h4>
+                            <div class="d-flex gap-2 align-items-center text-muted small">
+                                <span><i class="bi bi-calendar-event me-1"></i> Due: <span id="detailDue"></span></span>
+                                <span>&bull;</span>
+                                <span id="detailPriority" class="badge"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-body custom-scrollbar text-primary  pt-4 pb-5">
+                        <h6 class="text-uppercase small fw-bold mb-2 " style="letter-spacing: 0.05em;">Description</h6>
+                        <p id="detailDescription" class="mb-4" style="line-height: 1.6;">Full task description goes here.</p>
+                        
+                        <h6 class="text-uppercase small fw-bold mb-2 " style="letter-spacing: 0.05em;">Created On</h6>
+                        <p id="detailCreated" class="mb-0"><i class="bi bi-clock me-1"></i> Oct 24, 2023</p>
+                    </div>
+                    <div class="modal-footer border-top border-light border-opacity-10 py-3 px-4 d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="deleteCurrentTask()">
+                            <i class="bi bi-trash me-1"></i> Delete
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="editCurrentTask()">
+                                <i class="bi bi-pencil me-1"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm rounded-pill px-3" id="btnDetailsComplete" onclick="toggleCurrentTaskComplete()">
+                                <i class="bi bi-check2"></i> Mark Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Task Form Modal (Create / Edit) -->
+        <div class="modal fade glass-modal" id="taskFormModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-start border-0">
+                    <div class="modal-header border-bottom border-light border-opacity-10">
+                        <h5 class="modal-title fw-bold text-primary" id="formModalTitle">Create New Task</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body custom-scrollbar pt-4 text-primary">
+                        <form id="taskForm">
+                            <input type="hidden" id="formTaskId">
+                            <div class="mb-4">
+                                <label class="form-label text-muted small fw-bold">Title *</label>
+                                <input type="text" id="formTaskTitle" class="form-control form-control-lg bg-transparent text-primary border-secondary shadow-none" placeholder="What needs to be done?" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label text-muted small fw-bold">Description</label>
+                                <textarea id="formTaskDesc" class="form-control bg-transparent text-primary border-secondary shadow-none" rows="3" placeholder="Add additional details..."></textarea>
+                            </div>
+                            <div class="row g-3 mb-2">
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small fw-bold">Due Date</label>
+                                    <input type="date" id="formTaskDue" class="form-control bg-transparent text-primary border-secondary shadow-none color-scheme-dark">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-muted small fw-bold">Priority</label>
+                                    <select id="formTaskPriority" class="form-select bg-transparent text-primary border-secondary shadow-none">
+                                        <option value="Low" class="text-dark">Low</option>
+                                        <option value="Medium" class="text-dark" selected>Medium</option>
+                                        <option value="High" class="text-dark">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top border-light border-opacity-10 py-3">
+                        <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="saveTask()">Save Task</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MOCK DATA & APP LOGIC SCRIPT -->
+        <script>
+            // --- 0. State variables ---
+            let viewMode = 'list'; // 'list' or 'grid'
+            let currentFilter = 'all'; 
+            let currentSort = 'dueDate';
+            let searchQuery = '';
+            let selectedTasks = new Set();
+            let editingTaskId = null;
+            let viewingTaskId = null;
+
+            // Mock Data Generation
+            let mockTasks = [
+                { id: 1, title: 'Finalize Q3 Marketing Strategy', description: 'Review the latest campaign metrics and adjust strategy for upcoming feature releases.', status: 'pending', priority: 'High', dueDate: '2026-03-20', createdDate: '2026-03-15' },
+                { id: 2, title: 'Renew SSL Certificates', description: 'Production SSL certificates are expiring soon. Generate new ones via let\'s encrypt.', status: 'overdue', priority: 'High', dueDate: '2026-03-18', createdDate: '2026-03-10' },
+                { id: 3, title: 'Update User Profile UI', description: 'Implement the new design specifications for the settings and user profile modal.', status: 'completed', priority: 'Medium', dueDate: '2026-03-22', createdDate: '2026-03-18' },
+                { id: 4, title: 'Schedule 1-on-1s with Team', description: 'Send out calendar invites for quarterly check-ins.', status: 'pending', priority: 'Low', dueDate: '2026-03-25', createdDate: '2026-03-19' },
+                { id: 5, title: 'Fix CSS Bug in Navigation', description: 'Dropdown menus are clipping under the main content on Safari mobile.', status: 'pending', priority: 'Medium', dueDate: '2026-03-21', createdDate: '2026-03-18' },
+                { id: 6, title: 'Database Backup Verification', description: 'Restore staging DB from production backup to ensure integrity.', status: 'completed', priority: 'High', dueDate: '2026-03-19', createdDate: '2026-03-10' },
+                { id: 7, title: 'Prepare Board Presentation', description: 'Draft slides focusing on user growth and revenue projections.', status: 'overdue', priority: 'High', dueDate: '2026-03-17', createdDate: '2026-03-05' },
+            ];
+
+            // Bootstrap Modals
+            let detailsModal;
+            let formModal;
+
+            // --- 1. Initialization ---
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initialize Bootstrap modals
+                detailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
+                formModal = new bootstrap.Modal(document.getElementById('taskFormModal'));
+
+                // Simulate network loading delay
+                setTimeout(() => {
+                    document.getElementById('loadingSkeletons').classList.add('d-none');
+                    document.getElementById('tasksContainer').classList.remove('d-none');
+                    document.getElementById('paginationContainer').classList.remove('d-none');
+                    
+                    renderTasks();
+                    attachEventListeners();
+                }, 800);
+            });
+
+            // --- 2. Event Listeners Setup ---
+            function attachEventListeners() {
+                // Search
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    searchQuery = e.target.value.toLowerCase();
+                    renderTasks();
+                });
+
+                // Filters
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        currentFilter = e.target.dataset.filter;
+                        clearSelection();
+                        renderTasks();
+                    });
+                });
+
+                // Sort Dropdown
+                document.getElementById('sortSelect').addEventListener('change', (e) => {
+                    currentSort = e.target.value;
+                    renderTasks();
+                });
+            }
+
+            // --- 3. Rendering Logic ---
+            function renderTasks() {
+                const container = document.getElementById('tasksContainer');
+                const emptyState = document.getElementById('emptyState');
+                
+                // 1. Filter
+                let filtered = mockTasks.filter(task => {
+                    const matchesSearch = task.title.toLowerCase().includes(searchQuery) || task.description.toLowerCase().includes(searchQuery);
+                    
+                    if (!matchesSearch) return false;
+                    if (currentFilter === 'all') return true;
+                    return task.status === currentFilter;
+                });
+
+                // 2. Sort
+                filtered.sort((a, b) => {
+                    if (currentSort === 'dueDate') return new Date(a.dueDate) - new Date(b.dueDate);
+                    if (currentSort === 'createdDate') return new Date(b.createdDate) - new Date(a.createdDate); // Newest first
+                    if (currentSort === 'priority') {
+                        const pWeight = { 'High': 3, 'Medium': 2, 'Low': 1 };
+                        return pWeight[b.priority] - pWeight[a.priority];
+                    }
+                    return 0;
+                });
+
+                // Handle Empty State
+                if (filtered.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.classList.remove('d-none');
+                    return;
+                } else {
+                    emptyState.classList.add('d-none');
+                }
+
+                // Render based on View Mode
+                if (viewMode === 'list') {
+                    container.className = 'glass-card pb-1 mb-4 overflow-hidden';
+                    container.innerHTML = renderListView(filtered);
+                } else {
+                    container.className = 'row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4';
+                    container.innerHTML = renderGridView(filtered);
+                }
+            }
+
+            // --- View Mode Toggles ---
+            function setViewMode(mode) {
+                viewMode = mode;
+                
+                const btnList = document.getElementById('btnListView');
+                const btnGrid = document.getElementById('btnGridView');
+                
+                if (mode === 'list') {
+                    btnList.classList.replace('text-muted', 'text-primary');
+                    btnList.style.background = 'rgba(255,255,255,0.1)';
+                    btnGrid.classList.replace('text-primary', 'text-muted');
+                    btnGrid.style.background = 'transparent';
+                } else {
+                    btnGrid.classList.replace('text-muted', 'text-primary');
+                    btnGrid.style.background = 'rgba(255,255,255,0.1)';
+                    btnList.classList.replace('text-primary', 'text-muted');
+                    btnList.style.background = 'transparent';
+                }
+                
+                renderTasks();
+            }
+
+            // --- Helper Formatting ---
+            function getPriorityBadgeClass(priority) {
+                if(priority === 'High') return 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25';
+                if(priority === 'Medium') return 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25';
+                return 'bg-info bg-opacity-10 text-info border border-info border-opacity-25';
+            }
+            
+            function getStatusBadgeClassAndIcon(status) {
+                if(status === 'completed') return { cls: 'text-success bg-success bg-opacity-10', icon: 'bi-check-circle-fill' };
+                if(status === 'overdue') return { cls: 'text-danger bg-danger bg-opacity-10', icon: 'bi-exclamation-circle-fill' };
+                return { cls: 'text-warning bg-warning bg-opacity-10', icon: 'bi-clock-fill' };
+            }
+
+            // --- Render Builders ---
+            function renderListView(tasks) {
+                let html = '<div class="table-responsive"><table class="table table-hover table-borderless text-primary mb-0 align-middle w-100" style="table-layout: fixed;">';
+                html += `
+                    <thead>
+                        <tr class="text-muted small text-uppercase" style="border-bottom: 1px solid rgba(255,255,255,0.1); letter-spacing: 0.05em;">
+                            <th style="width: 50px;" class="ps-4"></th>
+                            <th style="width: 40%;">Task Details</th>
+                            <th style="width: 15%;">Priority</th>
+                            <th style="width: 15%;">Due Date</th>
+                            <th style="width: 15%;">Status</th>
+                            <th style="width: 10%;" class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+
+                tasks.forEach(task => {
+                    const statusObj = getStatusBadgeClassAndIcon(task.status);
+                    const prioClass = getPriorityBadgeClass(task.priority);
+                    const isChecked = task.status === 'completed' ? 'checked' : '';
+                    const lineThrough = task.status === 'completed' ? 'text-decoration-line-through ' : '';
+                    const isSelected = selectedTasks.has(task.id);
+                    
+                    html += `
+                        <tr class="task-row" style="${isSelected ? 'background: rgba(79, 70, 229, 0.1);' : ''}">
+                            <td class="ps-4" onclick="event.stopPropagation()">
+                                <input class="form-check-input custom-checkbox rounded" type="checkbox" 
+                                    ${isSelected ? 'checked' : ''} onchange="toggleSelection(${task.id}, event)">
+                            </td>
+                            <td onclick="openDetails(${task.id})">
+                                <h6 class="mb-1 text-primary fw-semibold text-truncate ${lineThrough}">${task.title}</h6>
+                                <p class="text-muted small mb-0 text-truncate ${lineThrough}" style="max-width: 90%;">${task.description}</p>
+                            </td>
+                            <td onclick="openDetails(${task.id})"><span class="badge rounded-pill fw-normal px-2 py-1 ${prioClass}">${task.priority}</span></td>
+                            <td onclick="openDetails(${task.id})">
+                                <span class="small ${task.status === 'overdue' ? 'text-danger fw-bold' : 'text-muted'}">
+                                    <i class="bi bi-calendar4 mt-1 me-1"></i> ${task.dueDate}
+                                </span>
+                            </td>
+                            <td onclick="openDetails(${task.id})"><span class="badge rounded-pill fw-normal px-2 ${statusObj.cls}"><i class="bi ${statusObj.icon} me-1"></i> ${task.status}</span></td>
+                            <td class="text-end pe-4" onclick="event.stopPropagation()">
+                                <button class="btn btn-link text-muted p-1 border-0" onclick="editTask(${task.id})"><i class="bi bi-pencil transition-hover"></i></button>
+                                <button class="btn btn-link text-muted p-1 border-0" onclick="deleteTask(${task.id})"><i class="bi bi-trash transition-hover" style="color: #ef4444;"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table></div>';
+                return html;
+            }
+
+            function renderGridView(tasks) {
+                let html = '';
+                tasks.forEach(task => {
+                    const statusObj = getStatusBadgeClassAndIcon(task.status);
+                    const prioClass = getPriorityBadgeClass(task.priority);
+                    const lineThrough = task.status === 'completed' ? 'text-decoration-line-through ' : '';
+                    const isSelected = selectedTasks.has(task.id);
+
+                    html += `
+                        <div class="col">
+                            <div class="card h-100 glass-card task-card-item position-relative" style="${isSelected ? 'border-color: var(--primary-color) !important; background: rgba(79, 70, 229, 0.05);' : ''}" onclick="openDetails(${task.id})">
+                                <div class="card-body d-flex flex-column p-4">
+                                    
+                                    <div class="d-flex justify-content-between align-items-start mb-3" onclick="event.stopPropagation()">
+                                        <input class="form-check-input custom-checkbox rounded" type="checkbox" 
+                                            ${isSelected ? 'checked' : ''} onchange="toggleSelection(${task.id}, event)">
+                                        
+                                        <div class="dropdown">
+                                            <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-secondary">
+                                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="editTask(${task.id})"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                                <li><a class="dropdown-item text-success" href="javascript:void(0)" onclick="toggleTaskComplete(${task.id})"><i class="bi bi-check2 me-2"></i>Mark ${task.status==='completed'?'Pending':'Complete'}</a></li>
+                                                <li><hr class="dropdown-divider border-secondary"></li>
+                                                <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteTask(${task.id})"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <h5 class="fw-bold text-primary mb-2 ${lineThrough}">${task.title}</h5>
+                                    <p class="text-muted small mb-3 flex-grow-1 ${lineThrough}" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${task.description}</p>
+                                    
+                                    <div class="mt-auto pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge px-2 ${statusObj.cls}"><i class="bi ${statusObj.icon} me-1"></i> ${task.status}</span>
+                                            <span class="badge ${prioClass}">${task.priority}</span>
+                                        </div>
+                                        <small class="${task.status === 'overdue' ? 'text-danger fw-bold' : 'text-muted d-block'}">
+                                            <i class="bi bi-calendar-event  me-1"></i> Due ${task.dueDate}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                return html;
+            }
+
+            // --- 4. Selection & Bulk Actions ---
+            function toggleSelection(id, event) {
+                if (event.target.checked) selectedTasks.add(id);
+                else selectedTasks.delete(id);
+                
+                updateBulkActionBar();
+                renderTasks(); // Re-render to show selection highlight
+            }
+
+            function clearSelection() {
+                selectedTasks.clear();
+                updateBulkActionBar();
+                renderTasks();
+            }
+
+            function updateBulkActionBar() {
+                const bar = document.getElementById('bulkActionsBar');
+                const countBadge = document.getElementById('selectedCount');
+                
+                if (selectedTasks.size > 0) {
+                    countBadge.innerText = selectedTasks.size;
+                    bar.classList.add('show');
+                } else {
+                    bar.classList.remove('show');
+                }
+            }
+
+            function bulkDelete() {
+                mockTasks = mockTasks.filter(t => !selectedTasks.has(t.id));
+                clearSelection();
+            }
+
+            function bulkMarkCompleted() {
+                mockTasks.forEach(t => {
+                    if(selectedTasks.has(t.id)) t.status = 'completed';
+                });
+                clearSelection();
+                // trigger update stats header indirectly
+            }
+
+            // --- 5. Modal Operations (CRUD) ---
+            
+            // DETAILS
+            function openDetails(id) {
+                viewingTaskId = id;
+                const task = mockTasks.find(t => t.id === id);
+                if(!task) return;
+
+                document.getElementById('detailTitle').innerText = task.title;
+                document.getElementById('detailDescription').innerText = task.description || 'No description provided.';
+                document.getElementById('detailDue').innerText = task.dueDate;
+                document.getElementById('detailCreated').innerHTML = `<i class="bi bi-clock me-1"></i> ${task.createdDate}`;
+                
+                const statObj = getStatusBadgeClassAndIcon(task.status);
+                const statBadge = document.getElementById('detailStatus');
+                statBadge.className = `badge rounded-pill px-3 py-2 fw-medium ${statObj.cls}`;
+                statBadge.innerHTML = `<i class="bi ${statObj.icon} me-1"></i> ${task.status.toUpperCase()}`;
+
+                const prioBadge = document.getElementById('detailPriority');
+                prioBadge.className = `badge ${getPriorityBadgeClass(task.priority)}`;
+                prioBadge.innerText = task.priority + " Priority";
+
+                const compBtn = document.getElementById('btnDetailsComplete');
+                if (task.status === 'completed') {
+                    compBtn.className = "btn btn-outline-warning btn-sm rounded-pill px-3";
+                    compBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Mark Pending';
+                } else {
+                    compBtn.className = "btn btn-success btn-sm rounded-pill px-3";
+                    compBtn.innerHTML = '<i class="bi bi-check2"></i> Mark Complete';
+                }
+
+                detailsModal.show();
+            }
+
+            function deleteCurrentTask() {
+                if(viewingTaskId) {
+                    deleteTask(viewingTaskId);
+                    detailsModal.hide();
+                }
+            }
+
+            function toggleCurrentTaskComplete() {
+                if(viewingTaskId) {
+                    toggleTaskComplete(viewingTaskId);
+                    openDetails(viewingTaskId); // refresh modal
+                    renderTasks(); // refresh background
+                }
+            }
+
+            function editCurrentTask() {
+                detailsModal.hide();
+                editTask(viewingTaskId);
+            }
+
+            // SINGLE ACTIONS
+            function deleteTask(id) {
+                mockTasks = mockTasks.filter(t => t.id !== id);
+                selectedTasks.delete(id);
+                updateBulkActionBar();
+                renderTasks();
+            }
+
+            function toggleTaskComplete(id) {
+                const task = mockTasks.find(t => t.id === id);
+                if(task) {
+                    task.status = task.status === 'completed' ? 'pending' : 'completed';
+                    // Optional overdue check
+                    if (task.status !== 'completed' && new Date(task.dueDate) < new Date()) {
+                        task.status = 'overdue';
+                    }
+                }
+                renderTasks();
+            }
+
+            // FORM (CREATE/EDIT)
+            function openCreateModal() {
+                editingTaskId = null;
+                document.getElementById('taskForm').reset();
+                document.getElementById('formModalTitle').innerText = "Create New Task";
+                
+                // Defaults
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('formTaskDue').value = today;
+
+                formModal.show();
+            }
+
+            function editTask(id) {
+                editingTaskId = id;
+                const task = mockTasks.find(t => t.id === id);
+                
+                document.getElementById('formModalTitle').innerText = "Edit Task";
+                document.getElementById('formTaskId').value = task.id;
+                document.getElementById('formTaskTitle').value = task.title;
+                document.getElementById('formTaskDesc').value = task.description;
+                document.getElementById('formTaskDue').value = task.dueDate;
+                document.getElementById('formTaskPriority').value = task.priority;
+
+                formModal.show();
+            }
+
+            function saveTask() {
+                const title = document.getElementById('formTaskTitle').value.trim();
+                if(!title) {
+                    alert('Title is required!');
+                    return;
+                }
+
+                const desc = document.getElementById('formTaskDesc').value.trim();
+                const due = document.getElementById('formTaskDue').value;
+                const prio = document.getElementById('formTaskPriority').value;
+
+                if (editingTaskId) {
+                    // Update Details
+                    const task = mockTasks.find(t => t.id === editingTaskId);
+                    task.title = title;
+                    task.description = desc;
+                    task.dueDate = due;
+                    task.priority = prio;
+                    
+                    // Basic overdue recalculation
+                    if (task.status !== 'completed') {
+                         task.status = new Date(due) < new Date() ? 'overdue' : 'pending';
+                    }
+
+                } else {
+                    // Create New
+                    const newId = Math.max(...mockTasks.map(t => t.id), 0) + 1;
+                    const createdDate = new Date().toISOString().split('T')[0];
+                    let status = new Date(due) < new Date() ? 'overdue' : 'pending';
+
+                    mockTasks.unshift({
+                        id: newId,
+                        title: title,
+                        description: desc,
+                        dueDate: due,
+                        priority: prio,
+                        status: status,
+                        createdDate: createdDate
+                    });
+                }
+
+                formModal.hide();
+                renderTasks();
+            }
+        </script>
+    </div>
+</body>
+</html>

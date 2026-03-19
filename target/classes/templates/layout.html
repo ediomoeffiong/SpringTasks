@@ -14,11 +14,27 @@
             --bg-glass: rgba(255, 255, 255, 0.8);
         }
 
+        /* WCAG Accessible Typography Utility Classes */
+        .text-primary { color: #1a1a1a !important; }
+        .text-secondary { color: #4a4a4a !important; }
+        .text-muted { color: #6b7280 !important; }
+        .bg-overlay-dark { background: rgba(0, 0, 0, 0.5) !important; }
+        .text-readable { text-shadow: 0 1px 3px rgba(0,0,0,0.6) !important; }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600 !important;
+            color: #1a1a1a;
+        }
+
+        p, span, div, li {
+            font-weight: 400;
+        }
+
         body {
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
-            color: #1e293b;
+            color: #1a1a1a;
         }
 
         .card {
@@ -272,7 +288,7 @@
                 </div>
                 <nav class="sidebar-menu">
                     <div class="sidebar-section-title">Main</div>
-                    <a th:href="@{/tasks}" class="sidebar-link" th:classappend="${currentUri == '/tasks' or currentUri == '/'} ? 'active' : ''">
+                    <a th:href="@{/dashboard}" class="sidebar-link" th:classappend="${currentUri == '/dashboard' or currentUri == '/'} ? 'active' : ''">
                         <i class="bi bi-grid-1x2-fill"></i> Dashboard
                     </a>
                     <a th:href="@{/my-tasks}" class="sidebar-link" th:classappend="${currentUri == '/my-tasks'} ? 'active' : ''">

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <title>Analytics Dashboard</title>
+    <!-- Chart.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Modern Dark/Glass Theme Classes */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 1rem;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workspace-header {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+            border-radius: 1rem;
+            padding: 2rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Metric Cards */
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+        .metric-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        .metric-trend {
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .metric-trend.up { color: #34d399; }
+        .metric-trend.down { color: #f87171; }
+        .metric-trend.neutral { color: #94a3b8; }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .chart-container-small {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        /* custom progress bars */
+        .custom-progress {
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .custom-progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        /* Recent Activity & Insights */
+        .activity-item {
+            border-left: 2px solid rgba(255,255,255,0.1);
+            position: relative;
+            padding-left: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        .activity-item:last-child {
+            padding-bottom: 0;
+            border-left-color: transparent;
+        }
+        .activity-indicator {
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 2px solid rgba(15, 23, 42, 1);
+        }
+
+        /* Select custom styling for dark mode */
+        select.dark-select {
+            background-color: rgba(255,255,255,0.05);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        select.dark-select option {
+            background-color: #1e293b;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        
+        <!-- 1. Header -->
+        <div class="workspace-header mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4">
+            <div>
+                <h2 class="fw-bold mb-2 text-primary"><i class="bi bi-graph-up me-2"></i>Analytics</h2>
+                <p class="text-muted mb-0" >Track your productivity and task performance.</p>
+            </div>
+            <div class="d-flex align-items-center gap-3 w-100 w-md-auto z-1">
+                <select class="form-select rounded-pill px-4 py-2 fw-semibold shadow-sm dark-select" style="min-width: 160px;">
+                    <option value="last7">Last 7 Days</option>
+                    <option value="last30" selected>Last 30 Days</option>
+                    <option value="thisYear">This Year</option>
+                </select>
+                <button class="btn btn-outline-light rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap" style="border-color: rgba(255,255,255,0.2);">
+                    <i class="bi bi-download me-1"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. Key Metrics Cards -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3 mb-4">
+            <!-- Total -->
+            <div class="col">
+                <div class="glass-card p-4 h-100">
+                    <p class="metric-label">Total Tasks</p>
+                    <h2 class="metric-value">124</h2>
+                    <div class="metric-trend up"><i class="bi bi-arrow-up-right"></i> +12% from last period</div>
+                </div>
+            </div>
+            <!-- Completed -->
+            <div class="col">
+                <div class="glass-card p-4 h-100">
+                    <p class="metric-label">Completed</p>
+                    <h2 class="metric-value text-success">89</h2>
+                    <div class="metric-trend up"><i class="bi bi-arrow-up-right"></i> +8% from last period</div>
+                </div>
+            </div>
+            <!-- Pending -->
+            <div class="col">
+                <div class="glass-card p-4 h-100">
+                    <p class="metric-label">Pending</p>
+                    <h2 class="metric-value text-info">28</h2>
+                    <div class="metric-trend neutral"><i class="bi bi-dash"></i> No change</div>
+                </div>
+            </div>
+            <!-- Overdue -->
+            <div class="col">
+                <div class="glass-card p-4 h-100">
+                    <p class="metric-label">Overdue</p>
+                    <h2 class="metric-value text-danger">7</h2>
+                    <div class="metric-trend down"><i class="bi bi-arrow-down-right"></i> -2% from last period</div>
+                </div>
+            </div>
+            <!-- Completion Rate -->
+            <div class="col">
+                <div class="glass-card p-4 h-100" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);">
+                    <p class="metric-label">Completion Rate</p>
+                    <h2 class="metric-value">71.7%</h2>
+                    <div class="custom-progress mt-2 mb-1">
+                        <div class="custom-progress-bar bg-success" style="width: 71.7%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Layout -->
+        <div class="row g-4 mb-4">
+            
+            <!-- 3. Task Completion Chart (Line/Area) -->
+            <div class="col-12 col-xl-8">
+                <div class="glass-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold text-primary mb-0">Tasks Completed Over Time</h5>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="completionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Tasks Distribution Chart (Doughnut) -->
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="fw-bold text-primary mb-4">Task Distribution</h5>
+                    <div class="chart-container-small d-flex justify-content-center align-items-center position-relative">
+                        <canvas id="distributionChart"></canvas>
+                        <!-- Center Text for Doughnut -->
+                        <div class="position-absolute text-center" style="pointer-events: none;">
+                            <h3 class="text-primary fw-bold mb-0">124</h3>
+                            <span class="text-muted small">Total</span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-4 mt-3">
+                        <div class="text-center">
+                            <i class="bi bi-circle-fill text-success small me-1"></i>
+                            <span class="text-primary small fw-bold">71%</span>
+                        </div>
+                        <div class="text-center">
+                            <i class="bi bi-circle-fill text-info small me-1"></i>
+                            <span class="text-primary small fw-bold">23%</span>
+                        </div>
+                        <div class="text-center">
+                            <i class="bi bi-circle-fill text-danger small me-1"></i>
+                            <span class="text-primary small fw-bold">6%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Productivity Trend (Bar Chart) -->
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="fw-bold text-primary mb-4">Productivity by Day</h5>
+                    <div class="chart-container-small">
+                        <canvas id="productivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Category Performance -->
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="fw-bold text-primary mb-4">Category Performance</h5>
+                    
+                    <div class="d-flex flex-column gap-3">
+                        <!-- Category 1 -->
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: #3b82f6; font-size:0.5rem;"></i>Development</span>
+                                <span class="text-muted small">34 / 40 (85%)</span>
+                            </div>
+                            <div class="custom-progress" style="height: 6px;">
+                                <div class="custom-progress-bar" style="width: 85%; background-color: #3b82f6;"></div>
+                            </div>
+                        </div>
+                        <!-- Category 2 -->
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: #ec4899; font-size:0.5rem;"></i>Design</span>
+                                <span class="text-muted small">22 / 30 (73%)</span>
+                            </div>
+                            <div class="custom-progress" style="height: 6px;">
+                                <div class="custom-progress-bar" style="width: 73%; background-color: #ec4899;"></div>
+                            </div>
+                        </div>
+                        <!-- Category 3 -->
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: #f59e0b; font-size:0.5rem;"></i>Marketing</span>
+                                <span class="text-muted small">12 / 20 (60%)</span>
+                            </div>
+                            <div class="custom-progress" style="height: 6px;">
+                                <div class="custom-progress-bar" style="width: 60%; background-color: #f59e0b;"></div>
+                            </div>
+                        </div>
+                        <!-- Category 4 -->
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: #10b981; font-size:0.5rem;"></i>Personal</span>
+                                <span class="text-muted small">21 / 34 (61%)</span>
+                            </div>
+                            <div class="custom-progress" style="height: 6px;">
+                                <div class="custom-progress-bar" style="width: 61%; background-color: #10b981;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8 & 9. Insights and Recent Activity -->
+            <div class="col-12 col-md-12 col-xl-4">
+                <div class="row g-4">
+                    <!-- Insights -->
+                    <div class="col-12 col-md-6 col-xl-12">
+                        <div class="glass-card p-4">
+                            <h5 class="fw-bold text-primary mb-3">AI Insights</h5>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <i class="bi bi-lightbulb text-warning mt-1"></i>
+                                        <div>
+                                            <p class="text-primary small fw-bold mb-0">Most Productive Day</p>
+                                            <p class="text-muted small mb-0">You complete on average <span class="text-primary fw-bold">14 tasks</span> on Tuesdays.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <i class="bi bi-lightning-charge text-info mt-1"></i>
+                                        <div>
+                                            <p class="text-primary small fw-bold mb-0">Evening Worker</p>
+                                            <p class="text-muted small mb-0">60% of your tasks are completed between 5 PM and 9 PM.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Feed -->
+                    <div class="col-12 col-md-6 col-xl-12">
+                        <div class="glass-card p-4 h-100">
+                            <h5 class="fw-bold text-primary mb-4">Recent Activity</h5>
+                            <div class="ps-2">
+                                <!-- Item 1 -->
+                                <div class="activity-item">
+                                    <div class="activity-indicator" style="background: #34d399;"></div>
+                                    <p class="mb-0 text-primary small fw-bold">Completed "Q2 Financial Report"</p>
+                                    <span class="text-muted" style="font-size: 0.70rem;">2 hours ago</span>
+                                </div>
+                                <!-- Item 2 -->
+                                <div class="activity-item">
+                                    <div class="activity-indicator" style="background: #e2e8f0;"></div>
+                                    <p class="mb-0 text-primary small fw-bold">Created task "Call Marketing Agency"</p>
+                                    <span class="text-muted" style="font-size: 0.70rem;">4 hours ago</span>
+                                </div>
+                                <!-- Item 3 -->
+                                <div class="activity-item">
+                                    <div class="activity-indicator" style="background: #34d399;"></div>
+                                    <p class="mb-0 text-primary small fw-bold">Completed "Team Sync Meeting"</p>
+                                    <span class="text-muted" style="font-size: 0.70rem;">Yesterday at 4:30 PM</span>
+                                </div>
+                                <!-- Item 4 -->
+                                <div class="activity-item border-0 pb-0">
+                                    <div class="activity-indicator" style="background: #e2e8f0;"></div>
+                                    <p class="mb-0 text-primary small fw-bold">Edited description on "Fix Auth Bugs"</p>
+                                    <span class="text-muted" style="font-size: 0.70rem;">Yesterday at 2:15 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Chart.js Logic Script -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                
+                // Common Chart Options for Dark Theme
+                Chart.defaults.color = '#94a3b8';
+                Chart.defaults.font.family = "'Inter', system-ui, -apple-system, sans-serif";
+                
+                const gridOptions = {
+                    color: 'rgba(255, 255, 255, 0.05)',
+                    borderColor: 'rgba(255, 255, 255, 0.1)'
+                };
+
+                // --- 1. Completion Line/Area Chart ---
+                const ctxCompletion = document.getElementById('completionChart').getContext('2d');
+                
+                // Gradient for Area Chart
+                let gradientComplete = ctxCompletion.createLinearGradient(0, 0, 0, 300);
+                gradientComplete.addColorStop(0, 'rgba(99, 102, 241, 0.5)'); // Indigo
+                gradientComplete.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+                new Chart(ctxCompletion, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mar 1', 'Mar 5', 'Mar 10', 'Mar 15', 'Mar 20', 'Mar 25', 'Mar 30'],
+                        datasets: [{
+                            label: 'Tasks Completed',
+                            data: [3, 7, 5, 12, 8, 15, 10],
+                            borderColor: '#6366f1',
+                            backgroundColor: gradientComplete,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4, // Smooth rounded curves
+                            pointBackgroundColor: '#1e293b',
+                            pointBorderColor: '#6366f1',
+                            pointHoverBackgroundColor: '#6366f1',
+                            pointHoverBorderColor: '#fff',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                titleColor: '#fff',
+                                bodyColor: '#cbd5e1',
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1,
+                                padding: 10,
+                                displayColors: false
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { 
+                                grid: gridOptions,
+                                beginAtZero: true,
+                                border: { display: false }
+                            }
+                        }
+                    }
+                });
+
+                // --- 2. Task Distribution Doughnut Chart ---
+                const ctxDistribution = document.getElementById('distributionChart').getContext('2d');
+                new Chart(ctxDistribution, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completed', 'Pending', 'Overdue'],
+                        datasets: [{
+                            data: [89, 28, 7],
+                            backgroundColor: [
+                                '#34d399', // Emerald success
+                                '#38bdf8', // Light blue info
+                                '#f87171'  // Red danger
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%', // Inner hole size
+                        plugins: {
+                            legend: { display: false }, // Using custom HTML legend outside
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                padding: 10,
+                                cornerRadius: 8
+                            }
+                        }
+                    }
+                });
+
+                // --- 3. Productivity Bar Chart ---
+                const ctxProductivity = document.getElementById('productivityChart').getContext('2d');
+                new Chart(ctxProductivity, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Tasks',
+                            data: [8, 14, 11, 6, 12, 2, 4],
+                            backgroundColor: 'rgba(56, 189, 248, 0.8)', // Sky blue
+                            hoverBackgroundColor: 'rgba(56, 189, 248, 1)',
+                            borderRadius: 4,
+                            barThickness: 'flex',
+                            maxBarThickness: 30
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                displayColors: false
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { 
+                                grid: gridOptions, 
+                                beginAtZero: true,
+                                border: { display: false }
+                            }
+                        }
+                    }
+                });
+
+            });
+        </script>
+    </div>
+</body>
+</html>
