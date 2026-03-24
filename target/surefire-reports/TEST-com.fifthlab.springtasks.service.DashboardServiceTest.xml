@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.fifthlab.springtasks.controller.TaskControllerTest" time="21.341" tests="4" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.fifthlab.springtasks.service.DashboardServiceTest" time="0.898" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -62,36 +62,5 @@
     <property name="java.class.version" value="61.0"/>
     <property name="LOGGED_APPLICATION_NAME" value="[SpringTasks] "/>
   </properties>
-  <testcase name="testSaveTask" classname="com.fifthlab.springtasks.controller.TaskControllerTest" time="0.927">
-    <system-out><![CDATA[08:10:33.105 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.fifthlab.springtasks.controller.TaskControllerTest]: TaskControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-08:10:33.772 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.fifthlab.springtasks.SpringTasksApplication for test class com.fifthlab.springtasks.controller.TaskControllerTest
-08:10:34.207 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
-
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::                (v3.2.3)
-
-2026-03-23T08:10:35.957+01:00  INFO 18492 --- [SpringTasks] [           main] c.f.s.controller.TaskControllerTest      : Starting TaskControllerTest using Java 17.0.11 with PID 18492 (started by Ediomo Emma Effiong in C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks)
-2026-03-23T08:10:35.965+01:00  INFO 18492 --- [SpringTasks] [           main] c.f.s.controller.TaskControllerTest      : No active profile set, falling back to 1 default profile: "default"
-2026-03-23T08:10:43.914+01:00  INFO 18492 --- [SpringTasks] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
-2026-03-23T08:10:46.277+01:00  WARN 18492 --- [SpringTasks] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
-
-Using generated security password: ef3b8046-cba4-40d0-8fea-f320cf73f940
-
-This generated password is for development use only. Your security configuration must be updated before running your application in production.
-
-2026-03-23T08:10:46.904+01:00  INFO 18492 --- [SpringTasks] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@513fab1e, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@53d87b2d, org.springframework.security.web.context.SecurityContextHolderFilter@181098bf, org.springframework.security.web.header.HeaderWriterFilter@fbe8fd3, org.springframework.web.filter.CorsFilter@470135da, org.springframework.security.web.csrf.CsrfFilter@23c72128, org.springframework.security.web.authentication.logout.LogoutFilter@6d80e411, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@2ebf524, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@f0c1ae1, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@7323dce7, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@39c5a105, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@6a552721, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@3815a7d1, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5f68eec6, org.springframework.security.web.access.ExceptionTranslationFilter@7809b43a, org.springframework.security.web.access.intercept.AuthorizationFilter@31e22365]
-2026-03-23T08:10:47.219+01:00  INFO 18492 --- [SpringTasks] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
-2026-03-23T08:10:47.220+01:00  INFO 18492 --- [SpringTasks] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
-2026-03-23T08:10:47.223+01:00  INFO 18492 --- [SpringTasks] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 3 ms
-2026-03-23T08:10:47.316+01:00  INFO 18492 --- [SpringTasks] [           main] c.f.s.controller.TaskControllerTest      : Started TaskControllerTest in 13.134 seconds (process running for 17.03)
-]]></system-out>
-  </testcase>
-  <testcase name="testSaveTaskValidationError" classname="com.fifthlab.springtasks.controller.TaskControllerTest" time="4.524"/>
-  <testcase name="testIndex" classname="com.fifthlab.springtasks.controller.TaskControllerTest" time="0.141"/>
-  <testcase name="testDashboard" classname="com.fifthlab.springtasks.controller.TaskControllerTest" time="0.735"/>
+  <testcase name="testGetDashboardData" classname="com.fifthlab.springtasks.service.DashboardServiceTest" time="0.885"/>
 </testsuite>
