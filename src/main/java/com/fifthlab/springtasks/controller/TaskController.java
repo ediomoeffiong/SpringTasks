@@ -2,6 +2,8 @@ package com.fifthlab.springtasks.controller;
 
 import com.fifthlab.springtasks.model.Task;
 import com.fifthlab.springtasks.service.TaskService;
+import com.fifthlab.springtasks.service.DashboardService;
+import com.fifthlab.springtasks.model.DashboardResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class TaskController {
 
     private final TaskService taskService;
+    private final DashboardService dashboardService;
 
     @GetMapping("/")
     public String index() {
@@ -22,6 +25,10 @@ public class TaskController {
 
     @GetMapping("/dashboard")
     public String dashboardOverview(Model model) {
+        String username = dashboardService.getCurrentUsername();
+        DashboardResponseDTO dashboardData = dashboardService.getDashboardData(username);
+        model.addAttribute("dashboardData", dashboardData);
+        model.addAttribute("userName", username);
         return "dashboard-overview";
     }
 

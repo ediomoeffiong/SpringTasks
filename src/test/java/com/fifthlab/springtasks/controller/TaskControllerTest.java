@@ -2,6 +2,7 @@ package com.fifthlab.springtasks.controller;
 
 import com.fifthlab.springtasks.model.Task;
 import com.fifthlab.springtasks.service.TaskService;
+import com.fifthlab.springtasks.service.DashboardService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,6 +29,9 @@ public class TaskControllerTest {
 
     @MockBean
     private TaskService taskService;
+
+    @MockBean
+    private DashboardService dashboardService;
 
     @MockBean
     private JwtUtil jwtUtil;

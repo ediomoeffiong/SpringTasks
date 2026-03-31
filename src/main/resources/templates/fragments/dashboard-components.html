@@ -23,7 +23,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <p class="text-muted small text-uppercase fw-bold mb-1" style="letter-spacing: 0.05em;">Total Tasks</p>
-                        <h3 class="fw-bold text-primary mb-0 display-6">24</h3>
+                        <h3 class="fw-bold text-primary mb-0 display-6" th:text="${dashboardData != null ? dashboardData.totalTasks : 0}">24</h3>
                     </div>
                     <div class="stat-icon-wrapper rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: rgba(79, 70, 229, 0.15); color: #818cf8;">
                         <i class="bi bi-collection fs-4"></i>
@@ -41,7 +41,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <p class="text-muted small text-uppercase fw-bold mb-1" style="letter-spacing: 0.05em;">Completed</p>
-                        <h3 class="fw-bold text-primary mb-0 display-6">14</h3>
+                        <h3 class="fw-bold text-primary mb-0 display-6" th:text="${dashboardData != null ? dashboardData.completedTasks : 0}">14</h3>
                     </div>
                     <div class="stat-icon-wrapper rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
                         <i class="bi bi-check-circle fs-4"></i>
@@ -59,7 +59,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <p class="text-muted small text-uppercase fw-bold mb-1" style="letter-spacing: 0.05em;">Pending</p>
-                        <h3 class="fw-bold text-primary mb-0 display-6">8</h3>
+                        <h3 class="fw-bold text-primary mb-0 display-6" th:text="${dashboardData != null ? dashboardData.pendingTasks : 0}">8</h3>
                     </div>
                     <div class="stat-icon-wrapper rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
                         <i class="bi bi-hourglass-split fs-4"></i>
@@ -77,7 +77,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <p class="text-muted small text-uppercase fw-bold mb-1" style="letter-spacing: 0.05em;">Overdue</p>
-                        <h3 class="fw-bold text-primary mb-0 display-6">2</h3>
+                        <h3 class="fw-bold text-primary mb-0 display-6" th:text="${dashboardData != null ? dashboardData.overdueTasks : 0}">2</h3>
                     </div>
                     <div class="stat-icon-wrapper rounded-3 p-3 d-flex align-items-center justify-content-center" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
                         <i class="bi bi-exclamation-triangle fs-4"></i>
@@ -98,61 +98,23 @@
         </div>
         <div class="card-body p-4">
             <div class="d-flex flex-column gap-3">
-                
-                <!-- Task Item 1 -->
-                <div class="task-item p-3 rounded-3 d-flex align-items-center justify-content-between position-relative" style="background: rgba(255,255,255,0.03); transition: all 0.2s;">
+                <div th:if="${dashboardData == null or #lists.isEmpty(dashboardData.upcomingDeadlines)}" class="text-muted p-3 text-center">No upcoming tasks! 🎉</div>
+                <div th:each="task : ${dashboardData != null ? dashboardData.upcomingDeadlines : null}" class="task-item p-3 rounded-3 d-flex align-items-center justify-content-between position-relative" style="background: rgba(255,255,255,0.03); transition: all 0.2s;">
                     <div class="d-flex align-items-center gap-3">
                         <div class="form-check m-0">
-                            <input class="form-check-input flex-shrink-0" type="checkbox" value="" id="task1" style="width: 1.25rem; height: 1.25rem; border-color: #475569; background-color: transparent;">
+                            <input class="form-check-input flex-shrink-0" type="checkbox" th:id="'upcoming_' + ${task.id}" th:checked="${task.status == 'completed'}" disabled style="width: 1.25rem; height: 1.25rem; border-color: #475569; background-color: transparent;">
                         </div>
                         <div>
-                            <label class="form-check-label fw-semibold text-primary d-block mb-1" for="task1">
-                                Design Dashboard Mockups
+                            <label class="form-check-label fw-semibold text-primary d-block mb-1" th:for="'upcoming_' + ${task.id}" th:text="${task.title}" th:classappend="${task.status == 'completed'} ? 'text-decoration-line-through text-muted' : ''">
+                                Task Title
                             </label>
-                            <span class="badge text-warning bg-warning bg-opacity-10 fw-normal rounded-pill px-2">Pending &bull; 2:00 PM</span>
+                            <span class="badge fw-normal rounded-pill px-2" th:classappend="${task.status == 'completed'} ? 'text-success bg-success bg-opacity-10' : 'text-warning bg-warning bg-opacity-10'" th:text="${#strings.capitalize(task.status)} + (${task.dueDate != null} ? ' &bull; ' + ${#strings.substring(task.dueDate,0,10)} : '')">Pending</span>
                         </div>
                     </div>
-                    <div class="task-actions  transition-hover">
-                        <button class="btn btn-sm text-muted border-0 p-1"><i class="bi bi-pencil"></i></button>
+                    <div class="task-actions transition-hover">
+                        <a th:href="@{'/tasks/edit/' + ${task.id}}" class="btn btn-sm text-muted border-0 p-1"><i class="bi bi-pencil"></i></a>
                     </div>
                 </div>
-
-                <!-- Task Item 2 -->
-                <div class="task-item p-3 rounded-3 d-flex align-items-center justify-content-between position-relative" style="background: rgba(255,255,255,0.03); transition: all 0.2s;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="form-check m-0">
-                            <input class="form-check-input flex-shrink-0" type="checkbox" value="" id="task2" checked style="width: 1.25rem; height: 1.25rem; cursor: not-allowed;">
-                        </div>
-                        <div>
-                            <label class="form-check-label fw-semibold text-muted text-decoration-line-through d-block mb-1" for="task2">
-                                Review Team Pull Requests
-                            </label>
-                            <span class="badge text-success bg-success bg-opacity-10 fw-normal rounded-pill px-2">Completed &bull; 10:30 AM</span>
-                        </div>
-                    </div>
-                    <div class="task-actions  transition-hover">
-                        <button class="btn btn-sm text-muted border-0 p-1"><i class="bi bi-pencil"></i></button>
-                    </div>
-                </div>
-
-                <!-- Task Item 3 -->
-                <div class="task-item p-3 rounded-3 d-flex align-items-center justify-content-between position-relative" style="background: rgba(255,255,255,0.03); transition: all 0.2s;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="form-check m-0">
-                            <input class="form-check-input flex-shrink-0" type="checkbox" value="" id="task3" style="width: 1.25rem; height: 1.25rem; border-color: #475569; background-color: transparent;">
-                        </div>
-                        <div>
-                            <label class="form-check-label fw-semibold text-primary d-block mb-1" for="task3">
-                                Prepare Q3 Report Slides
-                            </label>
-                            <span class="badge text-warning bg-warning bg-opacity-10 fw-normal rounded-pill px-2">Pending &bull; 4:00 PM</span>
-                        </div>
-                    </div>
-                    <div class="task-actions  transition-hover">
-                        <button class="btn btn-sm text-muted border-0 p-1"><i class="bi bi-pencil"></i></button>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
@@ -161,9 +123,9 @@
     <div th:fragment="taskProgress" class="card border-0 mb-4 p-4 text-center" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%); border: 1px solid rgba(99, 102, 241, 0.2) !important;">
         <h5 class="fw-bold text-primary mb-3">Overall Progress</h5>
         <div class="progress rounded-pill bg-dark" style="height: 12px; border: 1px solid rgba(255,255,255,0.1);">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" th:style="'width: ' + (${dashboardData != null ? dashboardData.completionRate : 0}) + '%;'" th:attr="aria-valuenow=${dashboardData != null ? dashboardData.completionRate : 0}" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
-        <p class="text-muted mt-3 mb-0 fw-medium">You've completed <strong class="text-primary">65%</strong> of your tasks this week. Keep going!</p>
+        <p class="text-muted mt-3 mb-0 fw-medium">You've completed <strong class="text-primary" th:text="${dashboardData != null ? dashboardData.completionRate : 0} + '%'">65%</strong> of your tasks overall. Keep going!</p>
     </div>
 
     <!-- 5. Recent Tasks Fragment -->
@@ -173,35 +135,14 @@
         </div>
         <div class="card-body p-0 mt-3">
             <div class="list-group list-group-flush border-0">
-                <!-- Item 1 -->
-                <div class="list-group-item bg-transparent border-bottom px-4 py-3" style="border-color: rgba(255,255,255,0.05) !important;">
+                <div th:if="${dashboardData == null or #lists.isEmpty(dashboardData.recentTasks)}" class="text-muted p-3 text-center">No recent tasks!</div>
+                <div th:each="task : ${dashboardData != null ? dashboardData.recentTasks : null}" class="list-group-item bg-transparent border-bottom px-4 py-3" style="border-color: rgba(255,255,255,0.05) !important;">
                     <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                        <h6 class="mb-0 text-primary fw-semibold">Update Billing Information</h6>
-                        <small class="text-muted">Just now</small>
+                        <h6 class="mb-0 text-primary fw-semibold" th:text="${task.title}">Update Billing Information</h6>
+                        <small class="text-muted" th:text="${task.createdAt != null} ? ${#strings.substring(task.createdAt,0,10)} : ''">Just now</small>
                     </div>
                     <div class="d-flex align-items-center justify-content-between mt-2">
-                        <small class="text-secondary"><i class="bi bi-folder text-muted"></i> Finance</small>
-                        <span class="badge bg-dark text-muted fw-normal border" style="border-color: rgba(255,255,255,0.1) !important;">High Priority</span>
-                    </div>
-                </div>
-                <!-- Item 2 -->
-                <div class="list-group-item bg-transparent border-bottom px-4 py-3" style="border-color: rgba(255,255,255,0.05) !important;">
-                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                        <h6 class="mb-0 text-primary fw-semibold">Schedule 1-on-1s</h6>
-                        <small class="text-muted">2 hours ago</small>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between mt-2">
-                        <small class="text-secondary"><i class="bi bi-folder text-muted"></i> Management</small>
-                    </div>
-                </div>
-                <!-- Item 3 -->
-                <div class="list-group-item bg-transparent px-4 py-3">
-                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                        <h6 class="mb-0 text-primary fw-semibold">Fix CSS Header Bug</h6>
-                        <small class="text-muted">Yesterday</small>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between mt-2">
-                        <small class="text-secondary"><i class="bi bi-folder text-muted"></i> Development</small>
+                        <small class="text-secondary" th:classappend="${task.status == 'completed'} ? 'text-success' : 'text-warning'" th:text="${#strings.capitalize(task.status)}">Pending</small>
                     </div>
                 </div>
             </div>

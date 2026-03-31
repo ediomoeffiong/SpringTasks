@@ -45,7 +45,7 @@
     <div layout:fragment="content">
 
         <!-- Dashboard Header -->
-        <div th:replace="~{fragments/dashboard-components :: header(userName='Covenant')}"></div>
+        <div th:replace="~{fragments/dashboard-components :: header(userName=${userName})}"></div>
 
         <!-- 4 Summary Stats Cards -->
         <div th:replace="~{fragments/dashboard-components :: statsRow}"></div>

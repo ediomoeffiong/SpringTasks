@@ -53,6 +53,11 @@ public class SecurityConfig {
                 .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error", "/h2-console/**", "/dashboard", "/tasks", "/profile", "/settings", "/analytics", "/categories", "/calendar", "/notifications").permitAll() // Ensure static assets and frontend pages load
                 .anyRequest().authenticated()
             )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .deleteCookies("jwt", "JSESSIONID")
+            )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(headers -> headers.frameOptions(frame -> frame.disable())) // For H2 console
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

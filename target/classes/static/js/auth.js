@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (isLogin) {
                         const result = await response.json();
                         localStorage.setItem('token', result.token);
+                        document.cookie = `jwt=${result.token}; path=/; max-age=86400; SameSite=Strict`;
                         window.location.href = '/dashboard';
                     } else {
                         window.location.href = '/login?signupSuccess';
