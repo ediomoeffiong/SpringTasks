@@ -50,7 +50,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/images/**", "/error", "/h2-console/**", "/dashboard", "/tasks", "/profile", "/settings", "/analytics", "/categories", "/calendar", "/notifications").permitAll() // Ensure static assets and frontend pages load
+                .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error", "/h2-console/**", "/dashboard", "/tasks", "/profile", "/settings", "/analytics", "/categories", "/calendar", "/notifications").permitAll() // Ensure static assets and frontend pages load
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
