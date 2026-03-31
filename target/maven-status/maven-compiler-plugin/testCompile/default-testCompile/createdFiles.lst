@@ -1,1 +1,5 @@
+com\fifthlab\springtasks\security\JwtUtilTest.class
+com\fifthlab\springtasks\controller\AuthControllerTest.class
+com\fifthlab\springtasks\service\DashboardServiceTest$1.class
+com\fifthlab\springtasks\service\DashboardServiceTest.class
 com\fifthlab\springtasks\controller\TaskControllerTest.class

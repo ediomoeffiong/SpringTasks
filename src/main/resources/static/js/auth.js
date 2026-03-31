@@ -50,22 +50,89 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Form Loading State Simulation
+    // Form Submission Logic
     const authForms = document.querySelectorAll('.auth-form');
     authForms.forEach(form => {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
             const submitBtn = form.querySelector('button[type="submit"]');
+            
+            // Clear previous errors if any
+            const existingAlert = document.querySelector('.alert-danger');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
             if (submitBtn) {
                 submitBtn.classList.add('loading');
                 submitBtn.disabled = true;
+            }
+
+            try {
+                const isLogin = form.getAttribute('action').includes('login');
+                const url = isLogin ? '/api/auth/login' : '/api/auth/register';
                 
-                // For demo purposes, we prevent actual submission for a moment
-                // In a real app, this would be handled by the backend response
-                // e.preventDefault(); 
-                // setTimeout(() => { submitBtn.classList.remove('loading'); submitBtn.disabled = false; }, 2000);
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                
+                if (!isLogin && data.password !== data.confirmPassword) {
+                    showError(form, "Passwords do not match");
+                    return;
+                }
+                
+                if (!isLogin) {
+                    delete data.confirmPassword;
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    if (isLogin) {
+                        const result = await response.json();
+                        localStorage.setItem('token', result.token);
+                        window.location.href = '/dashboard';
+                    } else {
+                        window.location.href = '/login?signupSuccess';
+                    }
+                } else {
+                    const errorResponse = await response.text();
+                    let errorMessage = 'Authentication failed';
+                    try {
+                        const parsed = JSON.parse(errorResponse);
+                        errorMessage = parsed.message || errorMessage;
+                    } catch (e) {
+                        errorMessage = errorResponse || errorMessage;
+                    }
+                    showError(form, errorMessage);
+                }
+            } catch (error) {
+                console.error('Error during authentication:', error);
+                showError(form, 'An unexpected error occurred. Please try again.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
             }
         });
     });
+
+    function showError(form, message) {
+        let alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        form.parentNode.insertBefore(alertDiv, form);
+    }
 
     // Simple Form Validation Feedback
     const inputs = document.querySelectorAll('.form-control');

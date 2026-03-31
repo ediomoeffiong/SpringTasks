@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import com.fifthlab.springtasks.security.JwtUtil;
+import com.fifthlab.springtasks.security.CustomUserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -26,6 +28,12 @@ public class TaskControllerTest {
 
     @MockBean
     private TaskService taskService;
+
+    @MockBean
+    private JwtUtil jwtUtil;
+
+    @MockBean
+    private CustomUserDetailsService userDetailsService;
 
     @Test
     @WithMockUser

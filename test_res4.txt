@@ -1,0 +1,111 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.fifthlab:springtasks >----------------------
+[INFO] Building SpringTasks 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ springtasks ---
+[INFO] Deleting C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ springtasks ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 17 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ springtasks ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 26 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ springtasks ---
+[INFO] skip non existing resourceDirectory C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ springtasks ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 4 source files with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ springtasks ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.fifthlab.springtasks.controller.AuthControllerTest
+16:07:44.620 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.fifthlab.springtasks.controller.AuthControllerTest]: AuthControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+16:07:47.455 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.fifthlab.springtasks.SpringTasksApplication for test class com.fifthlab.springtasks.controller.AuthControllerTest
+16:07:49.784 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-03-24T16:07:55.074+01:00  INFO 22840 --- [SpringTasks] [           main] c.f.s.controller.AuthControllerTest      : Starting AuthControllerTest using Java 17.0.11 with PID 22840 (started by Ediomo Emma Effiong in C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks)
+2026-03-24T16:07:55.080+01:00  INFO 22840 --- [SpringTasks] [           main] c.f.s.controller.AuthControllerTest      : No active profile set, falling back to 1 default profile: "default"
+2026-03-24T16:08:03.997+01:00  INFO 22840 --- [SpringTasks] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-24T16:08:04.785+01:00  INFO 22840 --- [SpringTasks] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 760 ms. Found 2 JPA repository interfaces.
+2026-03-24T16:08:14.435+01:00  INFO 22840 --- [SpringTasks] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-24T16:08:15.172+01:00  INFO 22840 --- [SpringTasks] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-03-24T16:08:15.603+01:00  INFO 22840 --- [SpringTasks] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-24T16:08:19.046+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-24T16:08:19.202+01:00  INFO 22840 --- [SpringTasks] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-24T16:08:20.245+01:00  INFO 22840 --- [SpringTasks] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:taskdb user=SA
+2026-03-24T16:08:20.250+01:00  INFO 22840 --- [SpringTasks] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-24T16:08:20.498+01:00  WARN 22840 --- [SpringTasks] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-24T16:08:26.599+01:00  INFO 22840 --- [SpringTasks] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-24T16:08:27.059+01:00  INFO 22840 --- [SpringTasks] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-24T16:08:33.147+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-24T16:08:40.741+01:00  WARN 22840 --- [SpringTasks] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-24T16:08:42.095+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-03-24T16:08:44.394+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7eee42fc, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5967f0ff, org.springframework.security.web.context.SecurityContextHolderFilter@240fe338, org.springframework.security.web.header.HeaderWriterFilter@4f755506, org.springframework.web.filter.CorsFilter@580694ce, org.springframework.security.web.authentication.logout.LogoutFilter@72ab75c, com.fifthlab.springtasks.security.JwtAuthenticationFilter@7e484bd, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7d1f60cf, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2d7e6c8c, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5be521cd, org.springframework.security.web.session.SessionManagementFilter@cdf3815, org.springframework.security.web.access.ExceptionTranslationFilter@597f9d91, org.springframework.security.web.access.intercept.AuthorizationFilter@4746b5d]
+2026-03-24T16:08:52.300+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:taskdb'
+2026-03-24T16:08:53.478+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-03-24T16:08:53.479+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-03-24T16:08:53.481+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-03-24T16:08:53.663+01:00  INFO 22840 --- [SpringTasks] [           main] c.f.s.controller.AuthControllerTest      : Started AuthControllerTest in 64.31 seconds (process running for 81.592)
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 84.16 s -- in com.fifthlab.springtasks.controller.AuthControllerTest
+[INFO] Running com.fifthlab.springtasks.controller.TaskControllerTest
+2026-03-24T16:09:04.512+01:00  INFO 22840 --- [SpringTasks] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.fifthlab.springtasks.controller.TaskControllerTest]: TaskControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-24T16:09:04.755+01:00  INFO 22840 --- [SpringTasks] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.fifthlab.springtasks.SpringTasksApplication for test class com.fifthlab.springtasks.controller.TaskControllerTest
+2026-03-24T16:09:04.864+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-03-24T16:09:05.253+01:00  INFO 22840 --- [SpringTasks] [           main] c.f.s.controller.TaskControllerTest      : Starting TaskControllerTest using Java 17.0.11 with PID 22840 (started by Ediomo Emma Effiong in C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks)
+2026-03-24T16:09:05.254+01:00  INFO 22840 --- [SpringTasks] [           main] c.f.s.controller.TaskControllerTest      : No active profile set, falling back to 1 default profile: "default"
+2026-03-24T16:09:21.900+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-03-24T16:09:26.924+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@34b846a1, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@690506b0, org.springframework.security.web.context.SecurityContextHolderFilter@11105fbe, org.springframework.security.web.header.HeaderWriterFilter@227497ef, org.springframework.web.filter.CorsFilter@4f29bbde, org.springframework.security.web.csrf.CsrfFilter@5247c44f, org.springframework.security.web.authentication.logout.LogoutFilter@1517015c, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@6b0fece4, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@30d72c00, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@47d9bdf4, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@5c1a728, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7d99846f, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@361a1ec3, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@31a266e0, org.springframework.security.web.access.ExceptionTranslationFilter@5d22dd52, org.springframework.security.web.access.intercept.AuthorizationFilter@24e82f43]
+2026-03-24T16:09:27.062+01:00  WARN 22840 --- [SpringTasks] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 6714a27f-376d-45d8-8e40-ce6f52465a8d
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-03-24T16:09:27.134+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-03-24T16:09:27.134+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-03-24T16:09:27.141+01:00  INFO 22840 --- [SpringTasks] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 6 ms
+2026-03-24T16:09:27.277+01:00  INFO 22840 --- [SpringTasks] [           main] c.f.s.controller.TaskControllerTest      : Started TaskControllerTest in 22.414 seconds (process running for 115.207)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 43.12 s -- in com.fifthlab.springtasks.controller.TaskControllerTest
+[INFO] Running com.fifthlab.springtasks.security.JwtUtilTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.339 s -- in com.fifthlab.springtasks.security.JwtUtilTest
+[INFO] Running com.fifthlab.springtasks.service.DashboardServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.940 s -- in com.fifthlab.springtasks.service.DashboardServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:52 min
+[INFO] Finished at: 2026-03-24T16:09:51+01:00
+[INFO] ------------------------------------------------------------------------

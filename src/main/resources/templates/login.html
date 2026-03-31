@@ -35,10 +35,10 @@
 
             <form th:action="@{/login}" method="post" class="auth-form">
                 <div class="form-floating mb-3">
-                    <input type="email" class="form-control" id="email" name="username" placeholder="name@example.com"
-                        required autocomplete="email">
-                    <label for="email">Email address</label>
-                    <div class="invalid-feedback">Please enter a valid email.</div>
+                    <input type="text" class="form-control" id="emailOrUsername" name="emailOrUsername" placeholder="Email or Username"
+                        required autocomplete="username">
+                    <label for="emailOrUsername">Email or Username</label>
+                    <div class="invalid-feedback">Please enter your email or username.</div>
                 </div>
 
                 <div class="form-floating mb-3 password-wrapper">
