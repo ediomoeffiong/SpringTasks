@@ -300,34 +300,37 @@
             let currentFilter = 'all'; // all, unread, read
             let selectedIds = new Set();
             let viewingNotificationId = null;
+            let notifications = [];
 
-            // Mock Data
+            let detailsModal;
+
+            // Date helpers
             const todayRaw = new Date();
             const todayStr = todayRaw.toISOString().split('T')[0];
             const yesterdayRaw = new Date(todayRaw);
             yesterdayRaw.setDate(todayRaw.getDate() - 1);
             const yesterdayStr = yesterdayRaw.toISOString().split('T')[0];
-            const oldRaw = new Date(todayRaw);
-            oldRaw.setDate(todayRaw.getDate() - 4);
-            const oldStr = oldRaw.toISOString().split('T')[0];
-
-            let mockNotifications = [
-                { id: 1, type: 'completed', title: 'Task Completed!', message: 'You successfully completed the "Launch Q2 Campaign" task.', timestamp: '10 mins ago', dateGroup: todayStr, unread: true, relatedTask: 'Launch Q2 Campaign' },
-                { id: 2, type: 'overdue', title: 'Task Overdue', message: 'The task "Submit Expense Reports" was due yesterday and is now overdue.', timestamp: '3 hours ago', dateGroup: todayStr, unread: true, relatedTask: 'Submit Expense Reports' },
-                { id: 3, type: 'reminder', title: 'Upcoming Deadline', message: 'Reminder: "Client Feedback Call" is due in 2 hours. Be prepared!', timestamp: '5 hours ago', dateGroup: todayStr, unread: false, relatedTask: 'Client Feedback Call' },
-                { id: 4, type: 'created', title: 'New Task Assigned', message: 'Admin assigned a new task: "Update Dashboard Analytics" to your board.', timestamp: 'Yesterday at 2:00 PM', dateGroup: yesterdayStr, unread: false, relatedTask: 'Update Dashboard Analytics' },
-                { id: 5, type: 'system', title: 'System Maintenance', message: 'The servers will undergo scheduled maintenance tonight at 2:00 AM UTC. Expect 15 mins of downtime.', timestamp: 'Yesterday at 9:00 AM', dateGroup: yesterdayStr, unread: false, relatedTask: null },
-                { id: 6, type: 'completed', title: 'Milestone Reached', message: 'You unlocked the "Productivity Guru" badge for completing 50 tasks this month.', timestamp: 'Last Week', dateGroup: oldStr, unread: false, relatedTask: null },
-            ];
-
-            let detailsModal;
 
             document.addEventListener('DOMContentLoaded', () => {
                 detailsModal = new bootstrap.Modal(document.getElementById('notificationDetailsModal'));
-                
-                // Init load
-                renderNotifications();
+                loadNotifications();
             });
+
+            async function loadNotifications() {
+                try {
+                    const res = await fetch('/api/notifications');
+                    if(res.ok) {
+                        const data = await res.json();
+                        notifications = data.map(n => {
+                            const d = new Date(n.createdAt);
+                            const dStr = d.toISOString().split('T')[0];
+                            const timeStr = d.toLocaleString(undefined, {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'});
+                            return { ...n, dateGroup: dStr, timestamp: timeStr };
+                        });
+                        renderNotifications();
+                    }
+                } catch(e) { console.error("Failed to load notifications", e); }
+            }
 
             // --- Renders ---
             function renderNotifications() {
@@ -336,17 +339,17 @@
                 const masterCheck = document.getElementById('masterCheckbox');
                 
                 // Filter
-                let filtered = mockNotifications.filter(n => {
+                let filtered = notifications.filter(n => {
                     if (currentFilter === 'unread') return n.unread;
                     if (currentFilter === 'read') return !n.unread;
                     return true;
                 });
 
                 // Update Badges & Texts
-                const unreadTotal = mockNotifications.filter(n=>n.unread).length;
+                const unreadTotal = notifications.filter(n=>n.unread).length;
                 document.getElementById('unreadCountBadge').innerText = unreadTotal;
-                if(unreadTotal === 0) document.getElementById('unreadCountBadge').classList.add('bg-secondary', 'bg-');
-                else document.getElementById('unreadCountBadge').classList.remove('bg-secondary', 'bg-');
+                if(unreadTotal === 0) document.getElementById('unreadCountBadge').classList.add('bg-secondary', 'bg-opacity-50');
+                else document.getElementById('unreadCountBadge').classList.remove('bg-secondary', 'bg-opacity-50');
                 
                 document.getElementById('totalCountText').innerText = `${filtered.length} item${filtered.length!==1?'s':''}`;
 
@@ -385,7 +388,6 @@
 
                     groups[dateKey].forEach(n => {
                         
-                        // Setup mapping logic for visual types
                         let iconMapping = getMappingForType(n.type);
                         let isChecked = selectedIds.has(n.id) ? 'checked' : '';
                         let unreadClass = n.unread ? 'unread' : '';
@@ -444,7 +446,6 @@
                 event.preventDefault();
                 currentFilter = filterType;
                 
-                // Update active tab visuals
                 const links = document.querySelectorAll('#notificationTabs .nav-link');
                 links.forEach(l => l.classList.remove('active'));
                 event.currentTarget.classList.add('active');
@@ -453,52 +454,54 @@
                 renderNotifications();
             }
 
-            function markAsRead(id) {
-                const n = mockNotifications.find(n => n.id === id);
-                if(n) n.unread = false;
-                renderNotifications();
+            async function markAsRead(id) {
+                await fetch(`/api/notifications/${id}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({unread: false})
+                });
+                loadNotifications();
             }
 
-            function markAsUnread(id) {
-                const n = mockNotifications.find(n => n.id === id);
-                if(n) n.unread = true;
-                renderNotifications();
+            async function markAsUnread(id) {
+                await fetch(`/api/notifications/${id}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({unread: true})
+                });
+                loadNotifications();
             }
 
-            function deleteNotification(id) {
-                mockNotifications = mockNotifications.filter(n => n.id !== id);
+            async function deleteNotification(id) {
+                await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
                 selectedIds.delete(id);
-                renderNotifications();
+                loadNotifications();
             }
 
-            function markAllAsRead() {
-                mockNotifications.forEach(n => n.unread = false);
-                renderNotifications();
+            async function markAllAsRead() {
+                await fetch('/api/notifications/mark-all-read', { method: 'POST' });
+                loadNotifications();
             }
 
-            function clearAllNotifications() {
+            async function clearAllNotifications() {
                 if(confirm('Are you sure you want to permanently delete all notifications?')) {
-                    mockNotifications = [];
+                    await fetch('/api/notifications/clear-all', { method: 'DELETE' });
                     clearSelection();
-                    renderNotifications();
+                    loadNotifications();
                 }
             }
 
             // --- Selection & Bulk Actions ---
 
             function toggleSelect(id) {
-                if (selectedIds.has(id)) {
-                    selectedIds.delete(id);
-                } else {
-                    selectedIds.add(id);
-                }
+                if (selectedIds.has(id)) selectedIds.delete(id);
+                else selectedIds.add(id);
                 renderNotifications();
             }
 
             function toggleSelectAll() {
                 const masterCheck = document.getElementById('masterCheckbox');
-                
-                let visibleItems = mockNotifications.filter(n => {
+                let visibleItems = notifications.filter(n => {
                     if (currentFilter === 'unread') return n.unread;
                     if (currentFilter === 'read') return !n.unread;
                     return true;
@@ -528,34 +531,41 @@
                 }
             }
 
-            function bulkMarkRead() {
-                mockNotifications.forEach(n => {
-                    if(selectedIds.has(n.id)) n.unread = false;
+            async function bulkMarkRead() {
+                await fetch('/api/notifications/bulk-read', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(Array.from(selectedIds))
                 });
                 clearSelection();
+                loadNotifications();
             }
 
-            function bulkDelete() {
+            async function bulkDelete() {
                 if(confirm(`Delete ${selectedIds.size} selected items?`)) {
-                    mockNotifications = mockNotifications.filter(n => !selectedIds.has(n.id));
+                    await fetch('/api/notifications/bulk-delete', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(Array.from(selectedIds))
+                    });
                     clearSelection();
+                    loadNotifications();
                 }
             }
 
             // --- Details Modal ---
 
-            function openDetails(id, event) {
+            async function openDetails(id, event) {
                 // Ignore if clicked on a button/checkbox inside the item
                 if(event.target.tagName === 'INPUT' || event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
 
                 viewingNotificationId = id;
-                const n = mockNotifications.find(x => x.id === id);
+                const n = notifications.find(x => x.id === id);
                 if(!n) return;
 
-                // Auto-mark as read on open
+                // Auto-mark as read on open if unread
                 if(n.unread) {
-                    n.unread = false;
-                    renderNotifications(); // silent re-render behind modal
+                    await markAsRead(id); // this will trigger loadNotifications asynchronously
                 }
 
                 // Populate mapping
@@ -569,9 +579,9 @@
                 document.getElementById('detailMessage').innerText = n.message;
 
                 const extraArea = document.getElementById('detailExtraArea');
-                if(n.relatedTask) {
+                if(n.relatedTaskTitle) {
                     extraArea.classList.remove('d-none');
-                    document.getElementById('detailTaskTarget').innerText = n.relatedTask;
+                    document.getElementById('detailTaskTarget').innerText = n.relatedTaskTitle;
                 } else {
                     extraArea.classList.add('d-none');
                 }
@@ -579,9 +589,9 @@
                 detailsModal.show();
             }
 
-            function deleteCurrentNotification() {
+            async function deleteCurrentNotification() {
                 if(viewingNotificationId) {
-                    deleteNotification(viewingNotificationId);
+                    await deleteNotification(viewingNotificationId);
                     detailsModal.hide();
                 }
             }

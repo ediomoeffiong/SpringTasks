@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.lang.NonNull;
 
 @Controller
 @RequiredArgsConstructor
@@ -87,7 +88,7 @@ public class TaskController {
     }
 
     @GetMapping("/tasks/edit/{id}")
-    public String editTaskForm(@PathVariable Long id, Model model) {
+    public String editTaskForm(@PathVariable @NonNull Long id, Model model) {
         Task task = taskService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid task Id:" + id));
         model.addAttribute("task", task);
@@ -95,13 +96,13 @@ public class TaskController {
     }
 
     @PostMapping("/tasks/delete/{id}")
-    public String deleteTask(@PathVariable Long id) {
+    public String deleteTask(@PathVariable @NonNull Long id) {
         taskService.deleteById(id);
         return "redirect:/tasks";
     }
 
     @PostMapping("/tasks/toggle/{id}")
-    public String toggleTask(@PathVariable Long id) {
+    public String toggleTask(@PathVariable @NonNull Long id) {
         taskService.toggleStatus(id);
         return "redirect:/tasks";
     }

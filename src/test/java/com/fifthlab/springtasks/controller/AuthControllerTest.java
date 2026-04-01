@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional // Rollback after tests
+@SuppressWarnings("null")
 class AuthControllerTest {
 
     @Autowired

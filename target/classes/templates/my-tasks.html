@@ -363,16 +363,47 @@
             let editingTaskId = null;
             let viewingTaskId = null;
 
-            // Mock Data Generation
-            let mockTasks = [
-                { id: 1, title: 'Finalize Q3 Marketing Strategy', description: 'Review the latest campaign metrics and adjust strategy for upcoming feature releases.', status: 'pending', priority: 'High', dueDate: '2026-03-20', createdDate: '2026-03-15' },
-                { id: 2, title: 'Renew SSL Certificates', description: 'Production SSL certificates are expiring soon. Generate new ones via let\'s encrypt.', status: 'overdue', priority: 'High', dueDate: '2026-03-18', createdDate: '2026-03-10' },
-                { id: 3, title: 'Update User Profile UI', description: 'Implement the new design specifications for the settings and user profile modal.', status: 'completed', priority: 'Medium', dueDate: '2026-03-22', createdDate: '2026-03-18' },
-                { id: 4, title: 'Schedule 1-on-1s with Team', description: 'Send out calendar invites for quarterly check-ins.', status: 'pending', priority: 'Low', dueDate: '2026-03-25', createdDate: '2026-03-19' },
-                { id: 5, title: 'Fix CSS Bug in Navigation', description: 'Dropdown menus are clipping under the main content on Safari mobile.', status: 'pending', priority: 'Medium', dueDate: '2026-03-21', createdDate: '2026-03-18' },
-                { id: 6, title: 'Database Backup Verification', description: 'Restore staging DB from production backup to ensure integrity.', status: 'completed', priority: 'High', dueDate: '2026-03-19', createdDate: '2026-03-10' },
-                { id: 7, title: 'Prepare Board Presentation', description: 'Draft slides focusing on user growth and revenue projections.', status: 'overdue', priority: 'High', dueDate: '2026-03-17', createdDate: '2026-03-05' },
-            ];
+            // Live Data Fetching
+            let mockTasks = [];
+
+            async function loadTasks() {
+                try {
+                    const response = await fetch('/api/tasks');
+                    if (!response.ok) throw new Error('Failed to load tasks');
+                    const tasks = await response.json();
+                    
+                    mockTasks = tasks.map(t => {
+                        let status = t.completed ? 'completed' : 'pending';
+                        const due = t.dueDate ? t.dueDate.split('T')[0] : '';
+                        
+                        // Check overdue
+                        if (!t.completed && due) {
+                            const dueDateObj = new Date(due);
+                            const today = new Date();
+                            today.setHours(0,0,0,0);
+                            if (dueDateObj < today) status = 'overdue';
+                        }
+                        
+                        return {
+                            id: t.id,
+                            title: t.title,
+                            description: t.description || '',
+                            dueDate: due,
+                            priority: t.priority || 'Medium',
+                            status: status,
+                            createdDate: t.createdAt ? t.createdAt.split('T')[0] : ''
+                        };
+                    });
+                    
+                    document.getElementById('loadingSkeletons').classList.add('d-none');
+                    document.getElementById('tasksContainer').classList.remove('d-none');
+                    document.getElementById('paginationContainer').classList.remove('d-none');
+                    
+                    renderTasks();
+                } catch (error) {
+                    console.error("Error loading tasks:", error);
+                }
+            }
 
             // Bootstrap Modals
             let detailsModal;
@@ -384,15 +415,9 @@
                 detailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
                 formModal = new bootstrap.Modal(document.getElementById('taskFormModal'));
 
-                // Simulate network loading delay
-                setTimeout(() => {
-                    document.getElementById('loadingSkeletons').classList.add('d-none');
-                    document.getElementById('tasksContainer').classList.remove('d-none');
-                    document.getElementById('paginationContainer').classList.remove('d-none');
-                    
-                    renderTasks();
-                    attachEventListeners();
-                }, 800);
+                // Fetch real data
+                loadTasks();
+                attachEventListeners();
             });
 
             // --- 2. Event Listeners Setup ---
@@ -630,17 +655,28 @@
                 }
             }
 
-            function bulkDelete() {
-                mockTasks = mockTasks.filter(t => !selectedTasks.has(t.id));
-                clearSelection();
+            async function bulkDelete() {
+                try {
+                    await Promise.all(Array.from(selectedTasks).map(id => 
+                        fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+                    ));
+                    mockTasks = mockTasks.filter(t => !selectedTasks.has(t.id));
+                    clearSelection();
+                } catch(e) { console.error(e); }
             }
 
-            function bulkMarkCompleted() {
-                mockTasks.forEach(t => {
-                    if(selectedTasks.has(t.id)) t.status = 'completed';
-                });
-                clearSelection();
-                // trigger update stats header indirectly
+            async function bulkMarkCompleted() {
+                try {
+                    const incompleteSelected = Array.from(selectedTasks).filter(id => {
+                        const task = mockTasks.find(t => t.id === id);
+                        return task && task.status !== 'completed';
+                    });
+                    await Promise.all(incompleteSelected.map(id => 
+                        fetch(`/api/tasks/${id}/toggle`, { method: 'PATCH' })
+                    ));
+                    await loadTasks();
+                    clearSelection();
+                } catch(e) { console.error(e); }
             }
 
             // --- 5. Modal Operations (CRUD) ---
@@ -698,23 +734,33 @@
             }
 
             // SINGLE ACTIONS
-            function deleteTask(id) {
-                mockTasks = mockTasks.filter(t => t.id !== id);
-                selectedTasks.delete(id);
-                updateBulkActionBar();
-                renderTasks();
+            async function deleteTask(id) {
+                try {
+                    await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+                    mockTasks = mockTasks.filter(t => t.id !== id);
+                    selectedTasks.delete(id);
+                    updateBulkActionBar();
+                    renderTasks();
+                } catch(e) { console.error(e); }
             }
 
-            function toggleTaskComplete(id) {
-                const task = mockTasks.find(t => t.id === id);
-                if(task) {
-                    task.status = task.status === 'completed' ? 'pending' : 'completed';
-                    // Optional overdue check
-                    if (task.status !== 'completed' && new Date(task.dueDate) < new Date()) {
-                        task.status = 'overdue';
+            async function toggleTaskComplete(id) {
+                try {
+                    await fetch(`/api/tasks/${id}/toggle`, { method: 'PATCH' });
+                    const task = mockTasks.find(t => t.id === id);
+                    if(task) {
+                        task.status = task.status === 'completed' ? 'pending' : 'completed';
+                        // Optional overdue check
+                        if (task.status !== 'completed' && task.dueDate) {
+                            const today = new Date();
+                            today.setHours(0,0,0,0);
+                            if (new Date(task.dueDate) < today) {
+                                task.status = 'overdue';
+                            }
+                        }
                     }
-                }
-                renderTasks();
+                    renderTasks();
+                } catch(e) { console.error(e); }
             }
 
             // FORM (CREATE/EDIT)
@@ -744,7 +790,7 @@
                 formModal.show();
             }
 
-            function saveTask() {
+            async function saveTask() {
                 const title = document.getElementById('formTaskTitle').value.trim();
                 if(!title) {
                     alert('Title is required!');
@@ -755,38 +801,28 @@
                 const due = document.getElementById('formTaskDue').value;
                 const prio = document.getElementById('formTaskPriority').value;
 
-                if (editingTaskId) {
-                    // Update Details
-                    const task = mockTasks.find(t => t.id === editingTaskId);
-                    task.title = title;
-                    task.description = desc;
-                    task.dueDate = due;
-                    task.priority = prio;
-                    
-                    // Basic overdue recalculation
-                    if (task.status !== 'completed') {
-                         task.status = new Date(due) < new Date() ? 'overdue' : 'pending';
+                const payload = { title, description: desc, dueDate: due, priority: prio };
+
+                try {
+                    if (editingTaskId) {
+                        await fetch(`/api/tasks/${editingTaskId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        await fetch(`/api/tasks`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
                     }
-
-                } else {
-                    // Create New
-                    const newId = Math.max(...mockTasks.map(t => t.id), 0) + 1;
-                    const createdDate = new Date().toISOString().split('T')[0];
-                    let status = new Date(due) < new Date() ? 'overdue' : 'pending';
-
-                    mockTasks.unshift({
-                        id: newId,
-                        title: title,
-                        description: desc,
-                        dueDate: due,
-                        priority: prio,
-                        status: status,
-                        createdDate: createdDate
-                    });
+                    formModal.hide();
+                    await loadTasks();
+                } catch(e) {
+                    console.error(e);
+                    alert("Failed to save task!");
                 }
-
-                formModal.hide();
-                renderTasks();
             }
         </script>
     </div>

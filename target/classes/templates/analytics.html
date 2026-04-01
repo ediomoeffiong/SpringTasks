@@ -138,41 +138,41 @@
             <div class="col">
                 <div class="glass-card p-4 h-100">
                     <p class="metric-label">Total Tasks</p>
-                    <h2 class="metric-value">124</h2>
-                    <div class="metric-trend up"><i class="bi bi-arrow-up-right"></i> +12% from last period</div>
+                    <h2 class="metric-value" id="valTotalTasks">-</h2>
+                    <div class="metric-trend neutral" id="trendTotalTasks">Loading...</div>
                 </div>
             </div>
             <!-- Completed -->
             <div class="col">
                 <div class="glass-card p-4 h-100">
                     <p class="metric-label">Completed</p>
-                    <h2 class="metric-value text-success">89</h2>
-                    <div class="metric-trend up"><i class="bi bi-arrow-up-right"></i> +8% from last period</div>
+                    <h2 class="metric-value text-success" id="valCompleted">-</h2>
+                    <div class="metric-trend neutral" id="trendCompleted">Loading...</div>
                 </div>
             </div>
             <!-- Pending -->
             <div class="col">
                 <div class="glass-card p-4 h-100">
                     <p class="metric-label">Pending</p>
-                    <h2 class="metric-value text-info">28</h2>
-                    <div class="metric-trend neutral"><i class="bi bi-dash"></i> No change</div>
+                    <h2 class="metric-value text-info" id="valPending">-</h2>
+                    <div class="metric-trend neutral" id="trendPending">Loading...</div>
                 </div>
             </div>
             <!-- Overdue -->
             <div class="col">
                 <div class="glass-card p-4 h-100">
                     <p class="metric-label">Overdue</p>
-                    <h2 class="metric-value text-danger">7</h2>
-                    <div class="metric-trend down"><i class="bi bi-arrow-down-right"></i> -2% from last period</div>
+                    <h2 class="metric-value text-danger" id="valOverdue">-</h2>
+                    <div class="metric-trend neutral" id="trendOverdue">Loading...</div>
                 </div>
             </div>
             <!-- Completion Rate -->
             <div class="col">
                 <div class="glass-card p-4 h-100" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);">
                     <p class="metric-label">Completion Rate</p>
-                    <h2 class="metric-value">71.7%</h2>
+                    <h2 class="metric-value" id="valCompletionRate">-</h2>
                     <div class="custom-progress mt-2 mb-1">
-                        <div class="custom-progress-bar bg-success" style="width: 71.7%;"></div>
+                        <div class="custom-progress-bar bg-success" id="barCompletionRate" style="width: 0%;"></div>
                     </div>
                 </div>
             </div>
@@ -237,47 +237,8 @@
                 <div class="glass-card p-4 h-100">
                     <h5 class="fw-bold text-primary mb-4">Category Performance</h5>
                     
-                    <div class="d-flex flex-column gap-3">
-                        <!-- Category 1 -->
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: #3b82f6; font-size:0.5rem;"></i>Development</span>
-                                <span class="text-muted small">34 / 40 (85%)</span>
-                            </div>
-                            <div class="custom-progress" style="height: 6px;">
-                                <div class="custom-progress-bar" style="width: 85%; background-color: #3b82f6;"></div>
-                            </div>
-                        </div>
-                        <!-- Category 2 -->
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: #ec4899; font-size:0.5rem;"></i>Design</span>
-                                <span class="text-muted small">22 / 30 (73%)</span>
-                            </div>
-                            <div class="custom-progress" style="height: 6px;">
-                                <div class="custom-progress-bar" style="width: 73%; background-color: #ec4899;"></div>
-                            </div>
-                        </div>
-                        <!-- Category 3 -->
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: #f59e0b; font-size:0.5rem;"></i>Marketing</span>
-                                <span class="text-muted small">12 / 20 (60%)</span>
-                            </div>
-                            <div class="custom-progress" style="height: 6px;">
-                                <div class="custom-progress-bar" style="width: 60%; background-color: #f59e0b;"></div>
-                            </div>
-                        </div>
-                        <!-- Category 4 -->
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: #10b981; font-size:0.5rem;"></i>Personal</span>
-                                <span class="text-muted small">21 / 34 (61%)</span>
-                            </div>
-                            <div class="custom-progress" style="height: 6px;">
-                                <div class="custom-progress-bar" style="width: 61%; background-color: #10b981;"></div>
-                            </div>
-                        </div>
+                    <div class="d-flex flex-column gap-3" id="categoryPerformanceContainer">
+                        <div class="text-muted text-center py-4">Loading categories...</div>
                     </div>
                 </div>
             </div>
@@ -314,33 +275,10 @@
                     
                     <!-- Activity Feed -->
                     <div class="col-12 col-md-6 col-xl-12">
-                        <div class="glass-card p-4 h-100">
+                        <div class="glass-card p-4 h-100" style="min-height: 250px;">
                             <h5 class="fw-bold text-primary mb-4">Recent Activity</h5>
-                            <div class="ps-2">
-                                <!-- Item 1 -->
-                                <div class="activity-item">
-                                    <div class="activity-indicator" style="background: #34d399;"></div>
-                                    <p class="mb-0 text-primary small fw-bold">Completed "Q2 Financial Report"</p>
-                                    <span class="text-muted" style="font-size: 0.70rem;">2 hours ago</span>
-                                </div>
-                                <!-- Item 2 -->
-                                <div class="activity-item">
-                                    <div class="activity-indicator" style="background: #e2e8f0;"></div>
-                                    <p class="mb-0 text-primary small fw-bold">Created task "Call Marketing Agency"</p>
-                                    <span class="text-muted" style="font-size: 0.70rem;">4 hours ago</span>
-                                </div>
-                                <!-- Item 3 -->
-                                <div class="activity-item">
-                                    <div class="activity-indicator" style="background: #34d399;"></div>
-                                    <p class="mb-0 text-primary small fw-bold">Completed "Team Sync Meeting"</p>
-                                    <span class="text-muted" style="font-size: 0.70rem;">Yesterday at 4:30 PM</span>
-                                </div>
-                                <!-- Item 4 -->
-                                <div class="activity-item border-0 pb-0">
-                                    <div class="activity-indicator" style="background: #e2e8f0;"></div>
-                                    <p class="mb-0 text-primary small fw-bold">Edited description on "Fix Auth Bugs"</p>
-                                    <span class="text-muted" style="font-size: 0.70rem;">Yesterday at 2:15 PM</span>
-                                </div>
+                            <div class="ps-2" id="recentActivityContainer">
+                                <div class="text-muted text-center py-4">Loading activity...</div>
                             </div>
                         </div>
                     </div>
@@ -351,141 +289,228 @@
 
         <!-- Chart.js Logic Script -->
         <script>
+            let categories = [];
+            let tasks = [];
+            
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = "'Inter', system-ui, -apple-system, sans-serif";
+            const gridOptions = { color: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' };
+
+            let completionChartInst;
+            let distributionChartInst;
+            let productivityChartInst;
+
             document.addEventListener('DOMContentLoaded', () => {
-                
-                // Common Chart Options for Dark Theme
-                Chart.defaults.color = '#94a3b8';
-                Chart.defaults.font.family = "'Inter', system-ui, -apple-system, sans-serif";
-                
-                const gridOptions = {
-                    color: 'rgba(255, 255, 255, 0.05)',
-                    borderColor: 'rgba(255, 255, 255, 0.1)'
-                };
-
-                // --- 1. Completion Line/Area Chart ---
-                const ctxCompletion = document.getElementById('completionChart').getContext('2d');
-                
-                // Gradient for Area Chart
-                let gradientComplete = ctxCompletion.createLinearGradient(0, 0, 0, 300);
-                gradientComplete.addColorStop(0, 'rgba(99, 102, 241, 0.5)'); // Indigo
-                gradientComplete.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
-
-                new Chart(ctxCompletion, {
-                    type: 'line',
-                    data: {
-                        labels: ['Mar 1', 'Mar 5', 'Mar 10', 'Mar 15', 'Mar 20', 'Mar 25', 'Mar 30'],
-                        datasets: [{
-                            label: 'Tasks Completed',
-                            data: [3, 7, 5, 12, 8, 15, 10],
-                            borderColor: '#6366f1',
-                            backgroundColor: gradientComplete,
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4, // Smooth rounded curves
-                            pointBackgroundColor: '#1e293b',
-                            pointBorderColor: '#6366f1',
-                            pointHoverBackgroundColor: '#6366f1',
-                            pointHoverBorderColor: '#fff',
-                            pointRadius: 4,
-                            pointHoverRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                                titleColor: '#fff',
-                                bodyColor: '#cbd5e1',
-                                borderColor: 'rgba(255,255,255,0.1)',
-                                borderWidth: 1,
-                                padding: 10,
-                                displayColors: false
+                loadData();
+            });
+            
+            async function loadData() {
+                try {
+                    const [catRes, taskRes] = await Promise.all([
+                        fetch('/api/categories'),
+                        fetch('/api/tasks')
+                    ]);
+                    
+                    if (catRes.ok) categories = await catRes.json();
+                    if (taskRes.ok) {
+                        const rawTasks = await taskRes.json();
+                        tasks = rawTasks.map(t => {
+                            let status = t.completed ? 'completed' : 'pending';
+                            const due = t.dueDate ? t.dueDate.split('T')[0] : '';
+                            if (!t.completed && due) {
+                                const dueDateObj = new Date(due);
+                                dueDateObj.setHours(0,0,0,0);
+                                const today = new Date();
+                                today.setHours(0,0,0,0);
+                                if (dueDateObj < today) status = 'overdue';
                             }
-                        },
-                        scales: {
-                            x: { grid: { display: false } },
-                            y: { 
-                                grid: gridOptions,
-                                beginAtZero: true,
-                                border: { display: false }
-                            }
-                        }
+                            return { ...t, status: status };
+                        });
                     }
-                });
+                    
+                    calculateMetrics();
+                    initCharts();
+                    renderCategoryPerformance();
+                    renderRecentActivity();
+                } catch(e) {
+                    console.error("Failed to load analytics: ", e);
+                }
+            }
 
-                // --- 2. Task Distribution Doughnut Chart ---
+            function calculateMetrics() {
+                const total = tasks.length;
+                const completed = tasks.filter(t => t.status === 'completed').length;
+                const overdue = tasks.filter(t => t.status === 'overdue').length;
+                const pending = tasks.filter(t => t.status === 'pending').length;
+                const rate = total > 0 ? ((completed / total) * 100).toFixed(1) : 0;
+
+                document.getElementById('valTotalTasks').innerText = total;
+                document.getElementById('valCompleted').innerText = completed;
+                document.getElementById('valPending').innerText = pending;
+                document.getElementById('valOverdue').innerText = overdue;
+                document.getElementById('valCompletionRate').innerText = rate + '%';
+                document.getElementById('barCompletionRate').style.width = rate + '%';
+                
+                // Clear out trends for now since we don't have historical backend comparison
+                document.querySelectorAll('.metric-trend').forEach(el => el.innerHTML = '');
+            }
+
+            function initCharts() {
+                // 1. Task Distribution
+                const completed = tasks.filter(t => t.status === 'completed').length;
+                const pending = tasks.filter(t => t.status === 'pending').length;
+                const overdue = tasks.filter(t => t.status === 'overdue').length;
+                
+                if(distributionChartInst) distributionChartInst.destroy();
                 const ctxDistribution = document.getElementById('distributionChart').getContext('2d');
-                new Chart(ctxDistribution, {
+                distributionChartInst = new Chart(ctxDistribution, {
                     type: 'doughnut',
                     data: {
                         labels: ['Completed', 'Pending', 'Overdue'],
                         datasets: [{
-                            data: [89, 28, 7],
-                            backgroundColor: [
-                                '#34d399', // Emerald success
-                                '#38bdf8', // Light blue info
-                                '#f87171'  // Red danger
-                            ],
+                            data: [completed, pending, overdue],
+                            backgroundColor: ['#34d399', '#38bdf8', '#f87171'],
                             borderWidth: 0,
                             hoverOffset: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '75%', // Inner hole size
-                        plugins: {
-                            legend: { display: false }, // Using custom HTML legend outside
-                            tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                                padding: 10,
-                                cornerRadius: 8
-                            }
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+                });
+
+                // Helper: Get Last 7 Days Labels & Data
+                const last7Days = [];
+                const last7Counts = [];
+                const todayMidnight = new Date();
+                todayMidnight.setHours(0,0,0,0);
+                
+                for(let i=6; i>=0; i--) {
+                    const d = new Date(todayMidnight);
+                    d.setDate(d.getDate() - i);
+                    last7Days.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+                    
+                    // Count completed tasks on this day (assuming dueDate or createdAt is completion date, we'll proxy with createdAt or a generalized completion proxy if available. For demo, we proxy with createdAt for completed tasks)
+                    let dayCount = 0;
+                    tasks.forEach(t => {
+                        if(t.status === 'completed' && t.createdAt) {
+                            const tDate = new Date(t.createdAt);
+                            tDate.setHours(0,0,0,0);
+                            if(tDate.getTime() === d.getTime()) dayCount++;
                         }
+                    });
+                    last7Counts.push(dayCount);
+                }
+
+                // 2. Completion Chart
+                if(completionChartInst) completionChartInst.destroy();
+                const ctxCompletion = document.getElementById('completionChart').getContext('2d');
+                let gradientComplete = ctxCompletion.createLinearGradient(0, 0, 0, 300);
+                gradientComplete.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+                gradientComplete.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+                completionChartInst = new Chart(ctxCompletion, {
+                    type: 'line',
+                    data: {
+                        labels: last7Days,
+                        datasets: [{
+                            label: 'Tasks Completed',
+                            data: last7Counts,
+                            borderColor: '#6366f1',
+                            backgroundColor: gradientComplete,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#1e293b',
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: gridOptions, beginAtZero: true } } }
+                });
+
+                // 3. Productivity Bar (Mon-Sun totals over all time, or current week)
+                // Proxying based on createdAt day of week
+                const dayCounts = [0,0,0,0,0,0,0]; // Sun-Sat format
+                tasks.forEach(t => {
+                    if(t.createdAt) {
+                        const dDay = new Date(t.createdAt).getDay(); // 0 is Sunday
+                        // Shift to Mon=0...Sun=6
+                        const shiftDay = dDay === 0 ? 6 : dDay - 1;
+                        dayCounts[shiftDay]++;
                     }
                 });
 
-                // --- 3. Productivity Bar Chart ---
+                if(productivityChartInst) productivityChartInst.destroy();
                 const ctxProductivity = document.getElementById('productivityChart').getContext('2d');
-                new Chart(ctxProductivity, {
+                productivityChartInst = new Chart(ctxProductivity, {
                     type: 'bar',
                     data: {
                         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                         datasets: [{
-                            label: 'Tasks',
-                            data: [8, 14, 11, 6, 12, 2, 4],
-                            backgroundColor: 'rgba(56, 189, 248, 0.8)', // Sky blue
-                            hoverBackgroundColor: 'rgba(56, 189, 248, 1)',
-                            borderRadius: 4,
-                            barThickness: 'flex',
-                            maxBarThickness: 30
+                            label: 'Tasks Created',
+                            data: dayCounts,
+                            backgroundColor: 'rgba(56, 189, 248, 0.8)',
+                            borderRadius: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                                displayColors: false
-                            }
-                        },
-                        scales: {
-                            x: { grid: { display: false } },
-                            y: { 
-                                grid: gridOptions, 
-                                beginAtZero: true,
-                                border: { display: false }
-                            }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: gridOptions, beginAtZero: true } } }
                 });
+            }
 
-            });
+            function renderCategoryPerformance() {
+                const container = document.getElementById('categoryPerformanceContainer');
+                if(categories.length === 0) {
+                    container.innerHTML = '<div class="text-muted text-center py-4">No categories created</div>';
+                    return;
+                }
+
+                let html = '';
+                categories.forEach(c => {
+                    const catTasks = tasks.filter(t => t.categoryId === c.id);
+                    const totalCat = catTasks.length;
+                    const compCat = catTasks.filter(t => t.status === 'completed').length;
+                    const catRate = totalCat > 0 ? Math.round((compCat / totalCat) * 100) : 0;
+
+                    html += `
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: ${c.color || '#3b82f6'}; font-size:0.5rem;"></i>${c.name}</span>
+                                <span class="text-muted small">${compCat} / ${totalCat} (${catRate}%)</span>
+                            </div>
+                            <div class="custom-progress" style="height: 6px;">
+                                <div class="custom-progress-bar" style="width: ${catRate}%; background-color: ${c.color || '#3b82f6'};"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+
+            function renderRecentActivity() {
+                const container = document.getElementById('recentActivityContainer');
+                if(tasks.length === 0) {
+                    container.innerHTML = '<div class="text-muted text-center py-4">No recent activity</div>';
+                    return;
+                }
+
+                // Sort by createdAt desc
+                const sorted = [...tasks].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const top4 = sorted.slice(0, 4);
+
+                let html = '';
+                top4.forEach((t, index) => {
+                    const color = t.status === 'completed' ? '#34d399' : '#e2e8f0';
+                    const actMsg = t.status === 'completed' ? 'Completed task' : 'Added task';
+                    const timeStr = t.createdAt ? new Date(t.createdAt).toLocaleString(undefined, {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}) : '';
+                    
+                    html += `
+                        <div class="activity-item ${index === top4.length - 1 ? 'border-0 pb-0' : ''}">
+                            <div class="activity-indicator" style="background: ${color};"></div>
+                            <p class="mb-0 text-primary small fw-bold">${actMsg} "${t.title}"</p>
+                            <span class="text-muted" style="font-size: 0.70rem;">${timeStr}</span>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
         </script>
     </div>
 </body>

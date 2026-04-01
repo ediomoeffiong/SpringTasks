@@ -340,20 +340,41 @@
             let viewingTaskId = null;
             let editingTaskId = null;
 
-            // Mock Tasks
-            // Spread tasks across the current month for demonstration
-            let currentY = today.getFullYear();
-            let currentM = String(today.getMonth() + 1).padStart(2, '0');
+            // Live Tasks
+            let mockTasks = [];
             
-            let mockTasks = [
-                { id: 1, title: 'Q1 Review Meeting', description: 'Review Q1 performance with the board.', status: 'completed', priority: 'High', dueDate: `${currentY}-${currentM}-05` },
-                { id: 2, title: 'Server Maintenance', description: 'Monthly security patching and updates.', status: 'pending', priority: 'Medium', dueDate: `${currentY}-${currentM}-15` },
-                { id: 3, title: 'Submit Expense Reports', description: 'Submit all travel expenses for reimbursement.', status: 'overdue', priority: 'Low', dueDate: `${currentY}-${currentM}-10` },
-                { id: 4, title: 'Project Kickoff', description: 'Kickoff meeting for Project Alpha.', status: 'pending', priority: 'High', dueDate: `${currentY}-${currentM}-22` },
-                { id: 5, title: 'Client Feedback Call', description: 'Discuss recent delivery feedback with client X.', status: 'pending', priority: 'Medium', dueDate: `${currentY}-${currentM}-24` },
-                { id: 6, title: 'Team Outing', description: 'Quarterly team building event.', status: 'pending', priority: 'Low', dueDate: `${currentY}-${currentM}-28` },
-                { id: 7, title: 'Code Freeze', description: 'Finalize branch for v2.0 release.', status: 'pending', priority: 'High', dueDate: `${currentY}-${currentM}-30` },
-            ];
+            async function loadTasks() {
+                try {
+                    const response = await fetch('/api/tasks');
+                    if (!response.ok) throw new Error('Failed to load calendar tasks');
+                    const tasks = await response.json();
+                    
+                    mockTasks = tasks.map(t => {
+                        let status = t.completed ? 'completed' : 'pending';
+                        const due = t.dueDate ? t.dueDate.split('T')[0] : '';
+                        
+                        // Check overdue
+                        if (!t.completed && due) {
+                            const dueDateObj = new Date(due);
+                            if (dueDateObj < today) status = 'overdue';
+                        }
+                        
+                        return {
+                            id: t.id,
+                            title: t.title,
+                            description: t.description || '',
+                            dueDate: due,
+                            priority: t.priority || 'Medium',
+                            status: status,
+                            createdDate: t.createdAt ? t.createdAt.split('T')[0] : ''
+                        };
+                    });
+                    
+                    renderCalendar();
+                } catch (error) {
+                    console.error("Error loading tasks:", error);
+                }
+            }
 
             // Bootstrap Modals
             let detailsModal;
@@ -363,7 +384,7 @@
                 detailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
                 formModal = new bootstrap.Modal(document.getElementById('taskFormModal'));
                 
-                renderCalendar();
+                loadTasks();
             });
 
             // --- Calendar Logic ---
@@ -612,25 +633,31 @@
                 formModal.show();
             }
 
-            function toggleCurrentTaskComplete() {
-                const task = mockTasks.find(t => t.id === viewingTaskId);
-                if(task) {
-                    task.status = task.status === 'completed' ? 'pending' : 'completed';
-                    if(task.status === 'pending' && new Date(task.dueDate) < today) {
-                        task.status = 'overdue';
+            async function toggleCurrentTaskComplete() {
+                if(!viewingTaskId) return;
+                try {
+                    await fetch(`/api/tasks/${viewingTaskId}/toggle`, { method: 'PATCH' });
+                    await loadTasks();
+                    // Refetch the updated task to show in details modal
+                    const updatedTask = mockTasks.find(t => t.id === viewingTaskId);
+                    if (updatedTask) {
+                        openTaskDetails(viewingTaskId); 
+                    } else {
+                        detailsModal.hide();
                     }
-                    openTaskDetails(task.id);
-                    renderCalendar();
-                }
+                } catch(e) { console.error(e); }
             }
 
-            function deleteCurrentTask() {
-                mockTasks = mockTasks.filter(t => t.id !== viewingTaskId);
-                detailsModal.hide();
-                renderCalendar();
+            async function deleteCurrentTask() {
+                if(!viewingTaskId) return;
+                try {
+                    await fetch(`/api/tasks/${viewingTaskId}`, { method: 'DELETE' });
+                    detailsModal.hide();
+                    await loadTasks();
+                } catch(e) { console.error(e); }
             }
 
-            function saveTask() {
+            async function saveTask() {
                 const title = document.getElementById('formTaskTitle').value.trim();
                 const due = document.getElementById('formTaskDue').value;
                 if(!title || !due) {
@@ -641,33 +668,32 @@
                 const desc = document.getElementById('formTaskDesc').value;
                 const prio = document.getElementById('formTaskPriority').value;
                 
-                let derivedStatus = new Date(due) < today ? 'overdue' : 'pending';
+                const payload = { title, description: desc, dueDate: due, priority: prio };
 
-                if(editingTaskId) {
-                    let manualStatus = document.getElementById('formTaskStatus').value; // if user marks it implicitly
-                    if (manualStatus === 'completed') derivedStatus = 'completed';
+                try {
+                    if(editingTaskId) {
+                        let manualStatus = document.getElementById('formTaskStatus').value; // if user marks it implicitly
+                        payload.status = manualStatus;
 
-                    const t = mockTasks.find(t => t.id === editingTaskId);
-                    t.title = title;
-                    t.description = desc;
-                    t.dueDate = due;
-                    t.priority = prio;
-                    t.status = derivedStatus;
-                } else {
-                    const newId = Math.max(-1, ...mockTasks.map(t=>t.id)) + 1;
-                    mockTasks.push({
-                        id: newId, 
-                        title: title, 
-                        description: desc, 
-                        dueDate: due, 
-                        priority: prio, 
-                        status: derivedStatus,
-                        createdDate: new Date().toISOString().split('T')[0]
-                    });
+                        await fetch(`/api/tasks/${editingTaskId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        await fetch(`/api/tasks`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    }
+                    
+                    formModal.hide();
+                    await loadTasks();
+                } catch(e) {
+                    console.error(e);
+                    alert("Failed to save calendar event!");
                 }
-                
-                formModal.hide();
-                renderCalendar();
             }
 
             // --- Drag & Drop Placeholder ---

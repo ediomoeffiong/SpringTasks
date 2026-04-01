@@ -3,18 +3,14 @@ package com.fifthlab.springtasks.service;
 import com.fifthlab.springtasks.model.CategoryBreakdownDTO;
 import com.fifthlab.springtasks.model.DashboardResponseDTO;
 import com.fifthlab.springtasks.model.Task;
-import com.fifthlab.springtasks.model.TaskDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

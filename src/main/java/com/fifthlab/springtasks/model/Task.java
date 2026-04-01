@@ -30,7 +30,9 @@ public class Task {
     // New fields for dashboard and auth
     private LocalDateTime dueDate;
     
-    private String category;
+    private Long categoryId;
+    
+    private String priority;
     
     private String username;
 
@@ -49,3 +51,4 @@ public class Task {
         updatedAt = LocalDateTime.now();
     }
 }
+

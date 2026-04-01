@@ -9,7 +9,6 @@ import com.fifthlab.springtasks.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,7 +63,7 @@ public class AuthService {
         User user = userOpt.orElseThrow(() -> new org.springframework.security.authentication.BadCredentialsException("Invalid username or password"));
 
         // Authenticate using Spring Security
-        Authentication authentication = authenticationManager.authenticate(
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), loginRequest.getPassword())
         );
 

@@ -390,18 +390,17 @@
                 <div class="profile-header-content">
                     <div class="profile-avatar-wrapper">
                         <!-- Placeholder Initials -->
-                        <div class="profile-avatar-placeholder">JD</div>
+                        <div class="profile-avatar-placeholder" id="displayInitials">--</div>
                     </div>
 
                     <div class="profile-user-info">
-                        <h1 class="profile-name">Covenant</h1>
-                        <div class="profile-username">@uniquecovenant</div>
-                        <p class="profile-bio">Software Developer | Task Management Enthusiast | Building awesome things
-                            with Spring Boot and UI magic.</p>
+                        <h1 class="profile-name" id="displayFullName">Loading...</h1>
+                        <div class="profile-username" id="displayUsername">@loading</div>
+                        <p class="profile-bio" id="displayBio">Loading your biography details...</p>
 
                         <div class="profile-meta">
-                            <span><i class="bi bi-geo-alt-fill me-1"></i> Lagos, NG</span>
-                            <span><i class="bi bi-calendar3 me-1"></i> Joined March 2026</span>
+                            <span id="displayLocation"><i class="bi bi-geo-alt-fill me-1"></i> --</span>
+                            <span id="displayJoinDate"><i class="bi bi-calendar3 me-1"></i> Joined --</span>
                         </div>
                     </div>
 
@@ -427,26 +426,23 @@
                             <ul class="info-list">
                                 <li class="info-item">
                                     <span class="info-label">Full Name</span>
-                                    <span class="info-value">Covenant</span>
+                                    <span class="info-value" id="infoFullName">--</span>
                                 </li>
                                 <li class="info-item">
                                     <span class="info-label">Username</span>
-                                    <span class="info-value">@uniquecovenant</span>
+                                    <span class="info-value" id="infoUsername">@--</span>
                                 </li>
                                 <li class="info-item">
                                     <span class="info-label">Email Address</span>
-                                    <span class="info-value"><i class="bi bi-envelope"></i> covenant@gmail.com</span>
+                                    <span class="info-value" id="infoEmail"><i class="bi bi-envelope"></i> --</span>
                                 </li>
                                 <li class="info-item">
                                     <span class="info-label">Location</span>
-                                    <span class="info-value"><i class="bi bi-globe-americas"></i> Lagos,
-                                        NG</span>
+                                    <span class="info-value" id="infoLocation"><i class="bi bi-globe-americas"></i> --</span>
                                 </li>
                                 <li class="info-item">
                                     <span class="info-label">About</span>
-                                    <span class="info-value text-muted" style="font-size: 0.9rem;">Software Developer |
-                                        Task Management Enthusiast | Building awesome things with Spring Boot and UI
-                                        magic.</span>
+                                    <span class="info-value text-muted" style="font-size: 0.9rem;" id="infoBio">--</span>
                                 </li>
                             </ul>
                         </div>
@@ -464,7 +460,7 @@
                                     <h3 class="stat-title">Total Tasks</h3>
                                     <div class="stat-icon icon-blue"><i class="bi bi-collection"></i></div>
                                 </div>
-                                <div class="stat-value">148</div>
+                                <div class="stat-value" id="statTotalTasks">0</div>
                             </div>
                         </div>
                         <div class="col-md-6 col-xl-3">
@@ -473,7 +469,7 @@
                                     <h3 class="stat-title">Completed</h3>
                                     <div class="stat-icon icon-green"><i class="bi bi-check-circle"></i></div>
                                 </div>
-                                <div class="stat-value">112</div>
+                                <div class="stat-value" id="statCompleted">0</div>
                             </div>
                         </div>
                         <div class="col-md-6 col-xl-3">
@@ -482,7 +478,7 @@
                                     <h3 class="stat-title">Pending</h3>
                                     <div class="stat-icon icon-orange"><i class="bi bi-hourglass-split"></i></div>
                                 </div>
-                                <div class="stat-value">36</div>
+                                <div class="stat-value" id="statPending">0</div>
                             </div>
                         </div>
                         <div class="col-md-6 col-xl-3">
@@ -491,7 +487,7 @@
                                     <h3 class="stat-title">Success Rate</h3>
                                     <div class="stat-icon icon-purple"><i class="bi bi-graph-up-arrow"></i></div>
                                 </div>
-                                <div class="stat-value">75%</div>
+                                <div class="stat-value" id="statSuccessRate">0%</div>
                             </div>
                         </div>
                     </div>
@@ -566,41 +562,33 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
-                    <form action="#"
-                        onsubmit="event.preventDefault(); alert('Profile update simulation triggered.'); document.querySelector('#editProfileModal .btn-close').click();">
+                    <form onsubmit="event.preventDefault(); submitProfileEdit();">
                         <div class="modal-body p-4">
                             <div class="row g-4">
                                 <div class="col-md-6">
-                                    <label for="editFullName" class="form-label fw-bold text-secondary mb-1">Full
-                                        Name</label>
-                                    <input type="text" class="form-control bg-light" id="editFullName" value="John Doe"
-                                        required>
+                                    <label for="editFullName" class="form-label fw-bold text-secondary mb-1">Full Name</label>
+                                    <input type="text" class="form-control bg-light" id="editFullName" placeholder="e.g. John Doe">
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="editUsername"
-                                        class="form-label fw-bold text-secondary mb-1">Username</label>
+                                    <label for="editUsername" class="form-label fw-bold text-secondary mb-1">Username (Read Only)</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0 text-muted">@</span>
-                                        <input type="text" class="form-control border-start-0 ps-0 bg-light"
-                                            id="editUsername" value="johndoe" required>
+                                        <input type="text" class="form-control border-start-0 ps-0 bg-light" id="editUsername" readonly>
                                     </div>
                                 </div>
                                 <div class="col-12">
-                                    <label for="editLocation"
-                                        class="form-label fw-bold text-secondary mb-1">Location</label>
-                                    <input type="text" class="form-control bg-light" id="editLocation"
-                                        value="San Francisco, CA" placeholder="e.g. New York, USA">
+                                    <label for="editLocation" class="form-label fw-bold text-secondary mb-1">Location</label>
+                                    <input type="text" class="form-control bg-light" id="editLocation" placeholder="e.g. New York, USA">
                                 </div>
                                 <div class="col-12">
                                     <label for="editBio" class="form-label fw-bold text-secondary mb-1">Bio</label>
-                                    <textarea class="form-control bg-light" id="editBio" rows="4"
-                                        placeholder="Tell us a little about yourself...">Software Developer | Task Management Enthusiast | Building awesome things with Spring Boot and UI magic.</textarea>
+                                    <textarea class="form-control bg-light" id="editBio" rows="4" placeholder="Tell us a little about yourself..."></textarea>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
                             <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary fw-bold">Save Changes</button>
+                            <button type="submit" id="saveProfileBtn" class="btn btn-primary fw-bold">Save Changes</button>
                         </div>
                     </form>
                 </div>
@@ -608,6 +596,101 @@
         </div>
 
     </div>
-</body>
+    
+    <script layout:fragment="pageScripts">
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Load User profile
+                const userRes = await fetch('/api/user/me');
+                if (userRes.ok) {
+                    const user = await userRes.json();
+                    populateUserProfile(user);
+                }
 
+                // Load Dashboard stats for the cards
+                const dashRes = await fetch('/api/dashboard');
+                if (dashRes.ok) {
+                    const dashboard = await dashRes.json();
+                    populateUserStats(dashboard);
+                }
+            } catch(e) { console.error('Error loading profile page', e); }
+        });
+
+        function populateUserProfile(user) {
+            const displayName = user.fullName || user.username;
+            
+            document.getElementById('displayFullName').innerText = displayName;
+            document.getElementById('displayUsername').innerText = '@' + user.username;
+            document.getElementById('displayBio').innerText = user.bio || 'Your bio is currently empty. Add one to complete your profile!';
+            document.getElementById('displayLocation').innerHTML = `<i class="bi bi-geo-alt-fill me-1"></i> ${user.location || 'Location not specified'}`;
+            
+            // Format joined date
+            if (user.createdAt) {
+                const date = new Date(user.createdAt);
+                document.getElementById('displayJoinDate').innerHTML = `<i class="bi bi-calendar3 me-1"></i> Joined ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+            }
+
+            // Form fields
+            document.getElementById('editFullName').value = user.fullName || '';
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editLocation').value = user.location || '';
+            document.getElementById('editBio').value = user.bio || '';
+            
+            // Info List
+            document.getElementById('infoFullName').innerText = user.fullName || 'Not specified';
+            document.getElementById('infoUsername').innerText = '@' + user.username;
+            document.getElementById('infoEmail').innerHTML = `<i class="bi bi-envelope"></i> ${user.email}`;
+            document.getElementById('infoLocation').innerHTML = `<i class="bi bi-globe-americas"></i> ${user.location || 'Not specified'}`;
+            document.getElementById('infoBio').innerText = user.bio || 'Not specified';
+            
+            const initials = displayName.substring(0, 2).toUpperCase();
+            document.getElementById('displayInitials').innerText = initials;
+        }
+
+        function populateUserStats(dash) {
+            document.getElementById('statTotalTasks').innerText = dash.totalTasks;
+            document.getElementById('statCompleted').innerText = dash.completedTasks;
+            document.getElementById('statPending').innerText = dash.pendingTasks;
+            document.getElementById('statSuccessRate').innerText = dash.completionRate + '%';
+        }
+
+        async function submitProfileEdit() {
+            const btn = document.getElementById('saveProfileBtn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Saving...';
+            btn.disabled = true;
+
+            const payload = {
+                fullName: document.getElementById('editFullName').value,
+                location: document.getElementById('editLocation').value,
+                bio: document.getElementById('editBio').value
+            };
+            
+            try {
+                const res = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    const updatedUser = await res.json();
+                    populateUserProfile(updatedUser);
+                    
+                    // Close the modal cleanly
+                    const modalEl = document.getElementById('editProfileModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if(modal) modal.hide();
+                } else {
+                    console.error('Failed to update profile');
+                }
+            } catch(e) { 
+                console.error('Error saving profile', e); 
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
 </html>

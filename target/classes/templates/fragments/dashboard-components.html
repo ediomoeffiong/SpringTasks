@@ -160,31 +160,15 @@
         <div class="card-body p-4 pt-4">
             <div class="activity-timeline position-relative ps-4" style="border-left: 1px solid rgba(255,255,255,0.1);">
                 
-                <!-- Activity 1 -->
-                <div class="mb-4 position-relative">
-                    <span class="position-absolute rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; background: #0b1220; border: 2px solid #34d399; left: -28px; top: 0;">
-                        <i class="bi bi-check text-success" style="font-size: 0.8rem;"></i>
+                <div th:if="${dashboardData == null or #lists.isEmpty(dashboardData.activityFeed)}" class="text-muted p-3 text-center">No recent activity</div>
+                
+                <div th:each="activity : ${dashboardData != null ? dashboardData.activityFeed : null}" class="mb-4 position-relative">
+                    <span class="position-absolute rounded-circle d-flex align-items-center justify-content-center" 
+                          th:style="'width: 24px; height: 24px; background: #0b1220; border: 2px solid ' + (${activity.type == 'completed'} ? '#34d399' : (${activity.type == 'created'} ? '#818cf8' : '#94a3b8')) + '; left: -28px; top: 0;'">
+                        <i th:class="${activity.type == 'completed'} ? 'bi bi-check text-success' : (${activity.type == 'created'} ? 'bi bi-plus text-primary' : 'bi bi-pencil-fill text-secondary')" style="font-size: 0.8rem;"></i>
                     </span>
-                    <p class="text-primary fw-medium mb-1">Completed task "<span class="text-secondary">Review Team Pull Requests</span>"</p>
-                    <small class="text-muted d-flex align-items-center gap-1"><i class="bi bi-clock"></i> 10:30 AM</small>
-                </div>
-
-                <!-- Activity 2 -->
-                <div class="mb-4 position-relative">
-                    <span class="position-absolute rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; background: #0b1220; border: 2px solid #818cf8; left: -28px; top: 0;">
-                        <i class="bi bi-plus text-primary" style="font-size: 0.8rem;"></i>
-                    </span>
-                    <p class="text-primary fw-medium mb-1">Created a new task "<span class="text-secondary">Update Billing Information</span>"</p>
-                    <small class="text-muted d-flex align-items-center gap-1"><i class="bi bi-clock"></i> 9:15 AM</small>
-                </div>
-
-                <!-- Activity 3 -->
-                <div class="position-relative">
-                    <span class="position-absolute rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; background: #0b1220; border: 2px solid #94a3b8; left: -28px; top: 0;">
-                        <i class="bi bi-pencil-fill text-secondary" style="font-size: 0.6rem;"></i>
-                    </span>
-                    <p class="text-primary fw-medium mb-1">Updated task "<span class="text-secondary">Fix CSS Header Bug</span>"</p>
-                    <small class="text-muted d-flex align-items-center gap-1"><i class="bi bi-clock"></i> Yesterday, 4:45 PM</small>
+                    <p class="text-primary fw-medium mb-1"><span th:text="${activity.action}">Action</span> "<span class="text-secondary" th:text="${activity.taskTitle}">Task Title</span>"</p>
+                    <small class="text-muted d-flex align-items-center gap-1"><i class="bi bi-clock"></i> <span th:text="${activity.time != null} ? ${#temporals.format(activity.time, 'MMM d, h:mm a')} : ''">10:30 AM</span></small>
                 </div>
 
             </div>

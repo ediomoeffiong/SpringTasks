@@ -1,5 +1,6 @@
 package com.fifthlab.springtasks.service;
 
+import com.fifthlab.springtasks.model.ActivityDTO;
 import com.fifthlab.springtasks.model.CategoryBreakdownDTO;
 import com.fifthlab.springtasks.model.DashboardResponseDTO;
 import com.fifthlab.springtasks.model.Task;
@@ -14,11 +15,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fifthlab.springtasks.repository.NotificationRepository;
+
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
 
     private final TaskRepository taskRepository;
+    private final NotificationRepository notificationRepository;
 
     @Cacheable(value = "dashboardData", key = "#username")
     public DashboardResponseDTO getDashboardData(String username) {
@@ -46,6 +50,19 @@ public class DashboardService {
                 .map(TaskDTO::fromEntity)
                 .collect(Collectors.toList());
 
+        // Activity Feed from Notifications
+        List<com.fifthlab.springtasks.model.Notification> recentNotifications = notificationRepository.findByUsernameOrderByCreatedAtDesc(username);
+        List<ActivityDTO> activityFeed = recentNotifications.stream()
+                .limit(5)
+                .map(n -> ActivityDTO.builder()
+                        .type(n.getType())
+                        .action(n.getType().equalsIgnoreCase("completed") ? "Completed task" 
+                                : (n.getType().equalsIgnoreCase("created") ? "Created a new task" : "Updated task"))
+                        .taskTitle(n.getRelatedTaskTitle() != null ? n.getRelatedTaskTitle() : "")
+                        .time(n.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
         return new DashboardResponseDTO(
                 totalTasks,
                 completedTasks,
@@ -54,7 +71,8 @@ public class DashboardService {
                 completionRate,
                 recentTasks,
                 categoryBreakdown,
-                upcomingDeadlines
+                upcomingDeadlines,
+                activityFeed
         );
     }
     

@@ -257,24 +257,40 @@
                 { hex: '#64748b', name: 'Slate' }
             ];
 
-            // Mock Data
-            let mockCategories = [
-                { id: 1, name: 'Development', color: '#3b82f6', description: 'Software engineering, coding, and technical tasks.' },
-                { id: 2, name: 'Design', color: '#ec4899', description: 'UI/UX mockups, prototypes, and user research.' },
-                { id: 3, name: 'Marketing', color: '#f59e0b', description: 'Campaigns, social media, and outreach.' },
-                { id: 4, name: 'Personal', color: '#10b981', description: 'Life admin, health, and personal goals.' },
-                { id: 5, name: 'Meetings', color: '#a855f7', description: 'Team syncs, 1-on-1s, and client calls.' },
-            ];
+            // Live Data Fetch
+            let mockCategories = [];
+            let mockTasks = [];
 
-            let mockTasks = [
-                { id: 101, title: 'Implement Dashboard UI', categoryId: 1, status: 'completed' },
-                { id: 102, title: 'Fix Auth Bugs', categoryId: 1, status: 'pending' },
-                { id: 103, title: 'Create Logo Concepts', categoryId: 2, status: 'pending' },
-                { id: 104, title: 'Launch Q2 Campaign', categoryId: 3, status: 'overdue' },
-                { id: 105, title: 'Dentist Appointment', categoryId: 4, status: 'pending' },
-                { id: 106, title: 'Weekly Sync with Marketing', categoryId: 5, status: 'completed' },
-                { id: 107, title: 'Code Review for API', categoryId: 1, status: 'pending' },
-            ];
+            async function loadData() {
+                try {
+                    const [catRes, taskRes] = await Promise.all([
+                        fetch('/api/categories'),
+                        fetch('/api/tasks')
+                    ]);
+                    
+                    if (catRes.ok) mockCategories = await catRes.json();
+                    if (taskRes.ok) {
+                        const rawTasks = await taskRes.json();
+                        mockTasks = rawTasks.map(t => {
+                            let status = t.completed ? 'completed' : 'pending';
+                            const due = t.dueDate ? t.dueDate.split('T')[0] : '';
+                            if (!t.completed && due) {
+                                const dueDateObj = new Date(due);
+                                dueDateObj.setHours(0,0,0,0);
+                                const today = new Date();
+                                today.setHours(0,0,0,0);
+                                if (dueDateObj < today) status = 'overdue';
+                            }
+                            return { ...t, status: status };
+                        });
+                    }
+                    
+                    renderCategories();
+                    renderStats();
+                } catch(e) {
+                    console.error("Error loading category data: ", e);
+                }
+            }
 
             // Bootstrap Modals
             let detailsModal;
@@ -288,11 +304,7 @@
                 initColorSwatches();
                 attachEventListeners();
                 
-                // Simulate loading
-                setTimeout(() => {
-                    renderCategories();
-                    renderStats();
-                }, 400);
+                loadData();
             });
 
             // --- 2. Event Listeners & Init ---
@@ -521,14 +533,15 @@
                 editCategory(viewingCatId);
             }
 
-            function deleteCategory(id) {
+            async function deleteCategory(id) {
                 if(confirm("Are you sure you want to delete this category? Associated tasks will be uncategorized.")) {
-                    mockCategories = mockCategories.filter(c => c.id !== id);
-                    mockTasks.forEach(t => {
-                        if(t.categoryId === id) t.categoryId = null; // simulate untagging
-                    });
-                    renderCategories();
-                    renderStats();
+                    try {
+                        await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+                        detailsModal.hide();
+                        await loadData();
+                    } catch(e) {
+                        console.error("Failed to delete category: ", e);
+                    }
                 }
             }
 
@@ -539,7 +552,7 @@
                 }
             }
 
-            function saveCategory() {
+            async function saveCategory() {
                 const name = document.getElementById('formCatName').value.trim();
                 const desc = document.getElementById('formCatDesc').value.trim();
                 const color = document.getElementById('formCatColor').value;
@@ -553,24 +566,28 @@
                     return;
                 }
 
-                if (editingCatId) {
-                    const cat = mockCategories.find(c => c.id === editingCatId);
-                    cat.name = name;
-                    cat.description = desc;
-                    cat.color = color;
-                } else {
-                    const newId = Math.max(-1, ...mockCategories.map(c=>c.id)) + 1;
-                    mockCategories.push({
-                        id: newId,
-                        name: name,
-                        description: desc,
-                        color: color
-                    });
-                }
+                const payload = { name, description: desc, color };
 
-                formModal.hide();
-                renderCategories();
-                renderStats();
+                try {
+                    if (editingCatId) {
+                        await fetch(`/api/categories/${editingCatId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        await fetch(`/api/categories`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    }
+                    
+                    formModal.hide();
+                    await loadData();
+                } catch(e) {
+                    console.error("Failed to save category.", e);
+                }
             }
         </script>
     </div>

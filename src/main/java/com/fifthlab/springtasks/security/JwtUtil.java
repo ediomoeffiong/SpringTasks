@@ -17,12 +17,11 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    private final String secret;
+
     private final long expiration;
     private final Key key;
 
     public JwtUtil(@Value("${jwt.secret}") String secret, @Value("${jwt.expiration}") long expiration) {
-        this.secret = secret;
         this.expiration = expiration;
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }

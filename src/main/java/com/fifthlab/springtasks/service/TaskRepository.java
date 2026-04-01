@@ -22,6 +22,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     
     List<Task> findByUsernameAndCompletedFalseAndDueDateBetweenOrderByDueDateAsc(String username, LocalDateTime start, LocalDateTime end);
     
-    @Query("SELECT t.category as category, COUNT(t) as count FROM Task t WHERE t.username = :username AND t.category IS NOT NULL GROUP BY t.category")
+    @Query("SELECT c.name as category, COUNT(t) as count FROM Task t, Category c WHERE t.categoryId = c.id AND t.username = :username GROUP BY c.name")
     List<CategoryBreakdownDTO> getCategoryBreakdownByUsername(String username);
 }

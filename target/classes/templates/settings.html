@@ -334,17 +334,15 @@
                     <h5><i class="bi bi-person-badge"></i> Profile Details</h5>
                 </div>
                 <div class="settings-card-body">
-                    <form action="#" onsubmit="event.preventDefault(); alert('Profile logic not implemented yet!');">
+                    <form onsubmit="event.preventDefault(); saveBasicSettings();">
                         <div class="avatar-upload">
-                            <div class="avatar-placeholder" aria-label="User Avatar">
-                                JD
+                            <div class="avatar-placeholder" aria-label="User Avatar" id="settingsInitials">
+                                --
                             </div>
                             <div class="avatar-actions">
                                 <div>
-                                    <button type="button" class="btn btn-outline-primary btn-sm me-2">Upload New
-                                        Photo</button>
-                                    <button type="button"
-                                        class="btn btn-link text-muted btn-sm p-0 text-decoration-none">Remove</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm me-2">Upload New Photo</button>
+                                    <button type="button" class="btn btn-link text-muted btn-sm p-0 text-decoration-none">Remove</button>
                                 </div>
                                 <small class="text-muted d-block mt-1">Accepts JPG, PNG up to 2MB.</small>
                             </div>
@@ -353,26 +351,22 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label for="fullName" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="fullName" placeholder="John Doe"
-                                    value="John Doe">
+                                <input type="text" class="form-control" id="fullName" placeholder="Full Name">
                             </div>
                             <div class="col-md-6">
-                                <label for="username" class="form-label">Username</label>
+                                <label for="username" class="form-label">Username (Read Only)</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0 text-muted">@</span>
-                                    <input type="text" class="form-control border-start-0 ps-0" id="username"
-                                        placeholder="johndoe" value="johndoe">
+                                    <input type="text" class="form-control border-start-0 ps-0 text-muted" id="username" readonly>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <label for="emailAddress" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="emailAddress" value="johndoe@example.com"
-                                    readonly aria-describedby="emailHelp">
-                                <div id="emailHelp" class="form-text">To update your email address, please contact
-                                    support.</div>
+                                <input type="email" class="form-control text-muted" id="emailAddress" readonly aria-describedby="emailHelp">
+                                <div id="emailHelp" class="form-text">To update your email address, please contact support.</div>
                             </div>
                             <div class="col-12 mt-4 text-end">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="submit" id="saveBasicSettingsBtn" class="btn btn-primary">Save Changes</button>
                             </div>
                         </div>
                     </form>
@@ -385,19 +379,19 @@
                     <h5><i class="bi bi-shield-lock"></i> Security & Authentication</h5>
                 </div>
                 <div class="settings-card-body">
-                    <form action="#" onsubmit="event.preventDefault(); alert('Security logic not implemented yet!');">
+                    <form onsubmit="event.preventDefault(); saveSecuritySettings();" id="securityForm">
                         <div class="row g-4">
                             <div class="col-12">
                                 <label for="currentPassword" class="form-label">Current Password</label>
-                                <input type="password" class="form-control" id="currentPassword" placeholder="••••••••">
+                                <input type="password" class="form-control" id="currentPassword" placeholder="••••••••" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="newPassword" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="newPassword" placeholder="••••••••">
+                                <input type="password" class="form-control" id="newPassword" placeholder="••••••••" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                                <input type="password" class="form-control" id="confirmPassword" placeholder="••••••••">
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="••••••••" required>
                             </div>
 
                             <div class="col-12 mt-4">
@@ -405,18 +399,17 @@
                                 <div class="settings-switch-wrapper mt-3 border-bottom-0 pb-0">
                                     <div>
                                         <div class="switch-label">Two-Factor Authentication (2FA)</div>
-                                        <p class="switch-description">Add an extra layer of security to your account
-                                            during login.</p>
+                                        <p class="switch-description">Add an extra layer of security to your account during login.</p>
                                     </div>
                                     <div class="form-check form-switch fs-4 mb-0">
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                            id="twoFactorToggle" aria-label="Toggle Two-Factor Authentication">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="twoFactorToggle" aria-label="Toggle Two-Factor Authentication" onchange="autoSaveSecurityToggles()">
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-12 mt-4 text-end">
-                                <button type="submit" class="btn btn-primary">Update Security Settings</button>
+                                <p id="passwordErrorText" class="text-danger mb-2 d-none"></p>
+                                <button type="submit" id="savePasswordBtn" class="btn btn-primary">Update Password</button>
                             </div>
                         </div>
                     </form>
@@ -427,6 +420,7 @@
             <div class="settings-card">
                 <div class="settings-card-header">
                     <h5><i class="bi bi-bell"></i> Notification Preferences</h5>
+                    <button type="button" class="btn btn-sm btn-outline-primary ms-auto" onclick="saveNotificationSettings(this)">Save Preferences</button>
                 </div>
                 <div class="settings-card-body px-4 py-3">
                     <div class="settings-switch-wrapper">
@@ -524,16 +518,169 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-danger"
-                            onclick="alert('Account deletion UI simulation triggered.');" data-bs-dismiss="modal">Yes,
-                            delete my account</button>
+                            onclick="deleteAccountPermanently();">Yes, delete my account</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Script for UI Interactions (Theme selection simulator) -->
-        <script>
-            function selectTheme(element) {
+        <script layout:fragment="pageScripts">
+            
+            let currentUserLocation = '';
+            let currentUserBio = '';
+            
+            document.addEventListener('DOMContentLoaded', async () => {
+                await loadSettings();
+            });
+
+            async function loadSettings() {
+                try {
+                    const res = await fetch('/api/user/me');
+                    if (res.ok) {
+                        const user = await res.json();
+                        populateSettingsForm(user);
+                    }
+                } catch(e) { console.error('Error loading settings', e); }
+            }
+
+            function populateSettingsForm(user) {
+                // Profile Details section
+                document.getElementById('fullName').value = user.fullName || '';
+                document.getElementById('username').value = user.username || '';
+                document.getElementById('emailAddress').value = user.email || '';
+                
+                const initials = (user.fullName || user.username || 'JD').substring(0,2).toUpperCase();
+                document.getElementById('settingsInitials').innerText = initials;
+                
+                // Store non-settings UI data state to avoid overriding it during partial puts
+                currentUserLocation = user.location || '';
+                currentUserBio = user.bio || '';
+                
+                // Security / 2FA
+                document.getElementById('twoFactorToggle').checked = user.twoFactorEnabled;
+
+                // Notifications
+                document.getElementById('emailNotifToggle').checked = user.emailNotificationsEnabled;
+                document.getElementById('taskReminderToggle').checked = user.taskRemindersEnabled;
+                document.getElementById('productUpdatesToggle').checked = user.productUpdatesEnabled;
+
+                // Theme
+                const themeOptions = document.querySelectorAll('.theme-option');
+                themeOptions.forEach(opt => opt.classList.remove('selected'));
+                let themePref = user.themePreference || 'system';
+                const selectedOpt = document.querySelector(`.theme-option[data-theme="${themePref}"]`);
+                if(selectedOpt) selectedOpt.classList.add('selected');
+                else document.querySelector('.theme-option[data-theme="system"]').classList.add('selected');
+            }
+
+            async function saveBasicSettings() {
+                const btn = document.getElementById('saveBasicSettingsBtn');
+                const orig = btn.innerText;
+                btn.innerText = 'Saving...';
+                
+                const payload = {
+                    fullName: document.getElementById('fullName').value,
+                    location: currentUserLocation,
+                    bio: currentUserBio
+                };
+                
+                try {
+                    await fetch('/api/user/profile', {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+                } finally {
+                    btn.innerText = orig;
+                }
+            }
+
+            async function saveNotificationSettings(btn) {
+                const orig = btn.innerText;
+                btn.innerText = 'Saving...';
+                
+                const payload = {
+                    emailNotificationsEnabled: document.getElementById('emailNotifToggle').checked,
+                    taskRemindersEnabled: document.getElementById('taskReminderToggle').checked,
+                    productUpdatesEnabled: document.getElementById('productUpdatesToggle').checked,
+                    twoFactorEnabled: document.getElementById('twoFactorToggle').checked
+                };
+                
+                try {
+                    await fetch('/api/user/settings', {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+                } finally {
+                    btn.innerText = 'Saved!';
+                    setTimeout(() => btn.innerText = orig, 2000);
+                }
+            }
+
+            async function autoSaveSecurityToggles() {
+                const payload = {
+                    emailNotificationsEnabled: document.getElementById('emailNotifToggle').checked,
+                    taskRemindersEnabled: document.getElementById('taskReminderToggle').checked,
+                    productUpdatesEnabled: document.getElementById('productUpdatesToggle').checked,
+                    twoFactorEnabled: document.getElementById('twoFactorToggle').checked
+                };
+                await fetch('/api/user/settings', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            async function saveSecuritySettings() {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const errElement = document.getElementById('passwordErrorText');
+                
+                if (newPassword !== confirmPassword) {
+                    errElement.innerText = "New passwords do not match!";
+                    errElement.classList.remove('d-none');
+                    return;
+                }
+                errElement.classList.add('d-none');
+                
+                const btn = document.getElementById('savePasswordBtn');
+                const orig = btn.innerText;
+                btn.innerText = 'Updating...';
+                
+                try {
+                    const res = await fetch('/api/user/password', {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ currentPassword, newPassword })
+                    });
+                    
+                    if (!res.ok) {
+                        const errorMsg = await res.text();
+                        errElement.innerText = errorMsg || "Error updating password";
+                        errElement.classList.remove('d-none');
+                    } else {
+                        errElement.innerText = "Password successfully updated!";
+                        errElement.classList.remove('d-none', 'text-danger');
+                        errElement.classList.add('text-success');
+                        document.getElementById('securityForm').reset();
+                        
+                        // Reset colors after 3s
+                        setTimeout(() => {
+                            errElement.classList.add('d-none', 'text-danger');
+                            errElement.classList.remove('text-success');
+                        }, 3000);
+                    }
+                } catch(e) {
+                    console.error('Network error', e);
+                } finally {
+                    btn.innerText = orig;
+                }
+            }
+
+            async function selectTheme(element) {
                 // Remove 'selected' from all options
                 const options = document.querySelectorAll('.theme-option');
                 options.forEach(opt => opt.classList.remove('selected'));
@@ -541,9 +688,22 @@
                 // Add 'selected' to clicked option
                 element.classList.add('selected');
 
-                // Alert for demo purposes
                 const theme = element.getAttribute('data-theme');
-                console.log(`Preferred Theme updated to: ${theme}`);
+                
+                await fetch('/api/user/theme', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ themePreference: theme })
+                });
+            }
+
+            async function deleteAccountPermanently() {
+                try {
+                    const res = await fetch('/api/user/account', { method: 'DELETE' });
+                    if(res.ok) {
+                        window.location.href = '/login?deleted=true';
+                    }
+                } catch(e) { console.error('Failed to delete account', e); }
             }
         </script>
     </div>

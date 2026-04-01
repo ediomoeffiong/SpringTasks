@@ -18,4 +18,6 @@ public class DashboardResponseDTO {
     private List<TaskDTO> recentTasks;
     private List<CategoryBreakdownDTO> categoryBreakdown;
     private List<TaskDTO> upcomingDeadlines;
+    private List<ActivityDTO> activityFeed;
 }
+
