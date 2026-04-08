@@ -1,0 +1,42 @@
+version: "1"
+
+services:
+  # The web tier of your application
+  - type: web
+    name: springtasks-web
+    env: docker # Using the Dockerfile present in your repository
+    plan: free  # Use 'starter' or higher for production use
+    region: frankfurt # You can change this to match your DB region (e.g., ohio, oregon)
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      
+      # The application properties will default to 9765 as defined in your file,
+      # which matches your Dockerfile EXPOSE 9765 directive.
+      
+      # You can link a dynamically created Render database directly to these variables if you added one in this file.
+      # Since you ALREADY created a DB manually on the dashboard, we use sync=false placeholders here, 
+      # so that you will be prompted to fill these in on the Render dashboard but they won't be overridden on sync.
+      
+      - key: DB_HOST
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+        
+# Uncomment the block below ONLY IF you want to create a brand new database via this file.
+# If you leave it commented, Render will assume you are connecting to your existing DB.
+
+# databases:
+#   - name: springtasks-db-blueprint
+#     databaseName: springtasks_db
+#     user: springtasks_db_user
