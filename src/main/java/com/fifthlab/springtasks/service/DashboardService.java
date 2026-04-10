@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fifthlab.springtasks.repository.NotificationRepository;
+import com.fifthlab.springtasks.repository.TaskRepository;
 
 @Service
 @RequiredArgsConstructor

@@ -23,7 +23,7 @@ public class TaskRestController {
     @GetMapping
     public ResponseEntity<List<Task>> getAllTasks() {
         // Find by status null delegates to fetching all user tasks in current setup
-        return ResponseEntity.ok(taskService.findByStatus(null));
+        return ResponseEntity.ok(taskService.findByStatusAndSearch(null, null));
     }
 
     @PostMapping

@@ -4,6 +4,7 @@ com\fifthlab\springtasks\service\AuthService.class
 com\fifthlab\springtasks\repository\NotificationRepository.class
 com\fifthlab\springtasks\service\CategoryService.class
 com\fifthlab\springtasks\exception\UserAlreadyExistsException.class
+com\fifthlab\springtasks\config\JpaConfig.class
 com\fifthlab\springtasks\model\Task.class
 com\fifthlab\springtasks\controller\AuthController.class
 com\fifthlab\springtasks\controller\TaskRestController.class
@@ -18,7 +19,9 @@ com\fifthlab\springtasks\model\ActivityDTO.class
 com\fifthlab\springtasks\model\ActivityDTO$ActivityDTOBuilder.class
 com\fifthlab\springtasks\service\UserService.class
 com\fifthlab\springtasks\controller\CategoryRestController.class
+com\fifthlab\springtasks\exception\MvcExceptionHandler.class
 com\fifthlab\springtasks\SpringTasksApplication.class
+com\fifthlab\springtasks\repository\TaskRepository.class
 com\fifthlab\springtasks\repository\UserRepository.class
 com\fifthlab\springtasks\model\Category.class
 com\fifthlab\springtasks\security\JwtAuthenticationFilter.class
@@ -26,7 +29,6 @@ com\fifthlab\springtasks\service\TaskService.class
 com\fifthlab\springtasks\service\DashboardService.class
 com\fifthlab\springtasks\dto\RegisterRequest.class
 com\fifthlab\springtasks\model\Notification$NotificationBuilder.class
-com\fifthlab\springtasks\service\TaskRepository.class
 com\fifthlab\springtasks\controller\DashboardRestController.class
 com\fifthlab\springtasks\model\CategoryBreakdownDTO.class
 com\fifthlab\springtasks\controller\GlobalControllerAdvice.class

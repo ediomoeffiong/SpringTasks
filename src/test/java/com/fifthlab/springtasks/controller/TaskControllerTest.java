@@ -50,7 +50,7 @@ public class TaskControllerTest {
     @Test
     @WithMockUser
     public void testDashboard() throws Exception {
-        when(taskService.findByStatus(null)).thenReturn(Arrays.asList(new Task(), new Task()));
+        when(taskService.findByStatusAndSearch(null, null)).thenReturn(Arrays.asList(new Task(), new Task()));
 
         mockMvc.perform(get("/tasks"))
                 .andExpect(status().isOk())

@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.lang.NonNull;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -59,7 +60,9 @@ public class TaskController {
     }
 
     @GetMapping("/tasks")
-    public String dashboard(@RequestParam(required = false) String status, Model model) {
+    public String dashboard(@RequestParam(required = false) String status,
+                            @RequestParam(required = false) String search, 
+                            Model model) {
         Boolean completed = null;
         if ("completed".equalsIgnoreCase(status)) {
             completed = true;
@@ -67,8 +70,9 @@ public class TaskController {
             completed = false;
         }
 
-        model.addAttribute("tasks", taskService.findByStatus(completed));
+        model.addAttribute("tasks", taskService.findByStatusAndSearch(completed, search));
         model.addAttribute("activeStatus", status != null ? status : "all");
+        model.addAttribute("searchQuery", search);
         return "dashboard";
     }
 
@@ -79,11 +83,12 @@ public class TaskController {
     }
 
     @PostMapping("/tasks")
-    public String saveTask(@Valid @ModelAttribute("task") Task task, BindingResult result, Model model) {
+    public String saveTask(@Valid @ModelAttribute("task") Task task, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "task-form";
         }
         taskService.save(task);
+        redirectAttributes.addFlashAttribute("successMessage", "Task saved successfully!");
         return "redirect:/tasks";
     }
 
@@ -96,14 +101,16 @@ public class TaskController {
     }
 
     @PostMapping("/tasks/delete/{id}")
-    public String deleteTask(@PathVariable @NonNull Long id) {
+    public String deleteTask(@PathVariable @NonNull Long id, RedirectAttributes redirectAttributes) {
         taskService.deleteById(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Task deleted successfully!");
         return "redirect:/tasks";
     }
 
     @PostMapping("/tasks/toggle/{id}")
-    public String toggleTask(@PathVariable @NonNull Long id) {
+    public String toggleTask(@PathVariable @NonNull Long id, RedirectAttributes redirectAttributes) {
         taskService.toggleStatus(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Task status updated!");
         return "redirect:/tasks";
     }
 

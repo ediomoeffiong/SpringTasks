@@ -2,6 +2,7 @@ package com.fifthlab.springtasks.service;
 
 import com.fifthlab.springtasks.model.Notification;
 import com.fifthlab.springtasks.model.Task;
+import com.fifthlab.springtasks.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,17 +27,20 @@ public class TaskService {
     }
 
     public List<Task> findAll() {
-        return taskRepository.findAll();
+        return taskRepository.findByUsernameOrderByCreatedAtDesc(getCurrentUsername());
     }
 
-    public List<Task> findByStatus(Boolean completed) {
+    public List<Task> findByStatusAndSearch(Boolean completed, String search) {
         String username = getCurrentUsername();
-        if (completed == null) return taskRepository.findAll();
-        // Since we didn't add findByUsernameAndCompleted earlier, we can just filter or use findAll
-        // For keeping it simple while converting:
-        return taskRepository.findAll().stream()
-                .filter(t -> t.isCompleted() == completed && username.equals(t.getUsername()))
-                .toList(); // Note: ideally we should add findByUsernameAndCompleted to Repo, but this is a refactoring of the existing
+        boolean hasSearch = search != null && !search.trim().isEmpty();
+
+        if (completed == null) {
+            return hasSearch ? taskRepository.searchByUsernameAndTerm(username, search.trim()) 
+                             : taskRepository.findByUsernameOrderByCreatedAtDesc(username);
+        } else {
+            return hasSearch ? taskRepository.searchByUsernameAndTermAndCompleted(username, search.trim(), completed)
+                             : taskRepository.findByUsernameAndCompletedOrderByCreatedAtDesc(username, completed);
+        }
     }
 
     public Optional<Task> findById(@NonNull Long id) {

@@ -1,0 +1,55 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <th:block th:fragment="sidebar(currentUri)">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <aside class="sidebar" id="appSidebar">
+            <div class="sidebar-header">
+                <i class="bi bi-layers-fill"></i> SpringTasks
+            </div>
+            
+            <div class="px-3 pb-2 pt-1">
+                <a th:href="@{/tasks/new}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" th:classappend="${currentUri == '/tasks/new'} ? 'active' : ''">
+                    <i class="bi bi-plus-lg"></i> Add Task
+                </a>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <div class="sidebar-section-title">Main</div>
+                <a th:href="@{/dashboard}" class="sidebar-link" th:classappend="${currentUri == '/dashboard' or currentUri == '/'} ? 'active' : ''">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+                <a th:href="@{/tasks}" class="sidebar-link" th:classappend="${currentUri != null and currentUri.startsWith('/tasks') and currentUri != '/tasks/new'} ? 'active' : ''">
+                    <i class="bi bi-list-task"></i> Task List
+                </a>
+                <a th:href="@{/calendar}" class="sidebar-link" th:classappend="${currentUri == '/calendar'} ? 'active' : ''">
+                    <i class="bi bi-calendar3"></i> Calendar
+                </a>
+                <a th:href="@{/categories}" class="sidebar-link" th:classappend="${currentUri == '/categories'} ? 'active' : ''">
+                    <i class="bi bi-tags"></i> Categories
+                </a>
+                <a th:href="@{/analytics}" class="sidebar-link" th:classappend="${currentUri == '/analytics'} ? 'active' : ''">
+                    <i class="bi bi-graph-up"></i> Analytics
+                </a>
+                
+                <div class="sidebar-section-title">Account</div>
+                <a th:href="@{/notifications}" class="sidebar-link" th:classappend="${currentUri == '/notifications'} ? 'active' : ''">
+                    <i class="bi bi-bell"></i> Notifications
+                </a>
+                <a th:href="@{/profile}" class="sidebar-link" th:classappend="${currentUri == '/profile'} ? 'active' : ''">
+                    <i class="bi bi-person-circle"></i> Profile
+                </a>
+                <a th:href="@{/settings}" class="sidebar-link" th:classappend="${currentUri == '/settings'} ? 'active' : ''">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="sidebar-link w-100 border-0 bg-transparent text-start logout-link" style="cursor: pointer;">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </aside>
+    </th:block>
+</body>
+</html>
