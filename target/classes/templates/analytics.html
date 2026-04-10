@@ -9,9 +9,9 @@
     <style>
         /* Modern Dark/Glass Theme Classes */
         .glass-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--bg-glass);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid var(--card-border) !important;
             border-radius: 1rem;
             transition: all 0.2s ease-in-out;
             position: relative;
@@ -30,7 +30,7 @@
             font-size: 2.25rem;
             font-weight: 800;
             line-height: 1.2;
-            color: white;
+            color: var(--text-main);
             margin-bottom: 0.25rem;
         }
         .metric-label {
@@ -98,15 +98,15 @@
             border: 2px solid rgba(15, 23, 42, 1);
         }
 
-        /* Select custom styling for dark mode */
+        /* Select custom styling adaptive */
         select.dark-select {
-            background-color: rgba(255,255,255,0.05);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.1);
+            background-color: var(--bg-glass);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
         }
         select.dark-select option {
-            background-color: #1e293b;
-            color: white;
+            background-color: var(--bg-body);
+            color: var(--text-main);
         }
     </style>
 </head>
@@ -126,7 +126,7 @@
                     <option value="last30" selected>Last 30 Days</option>
                     <option value="thisYear">This Year</option>
                 </select>
-                <button class="btn btn-outline-light rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap" style="border-color: rgba(255,255,255,0.2);">
+                <button class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap">
                     <i class="bi bi-download me-1"></i> Export
                 </button>
             </div>
@@ -251,7 +251,7 @@
                         <div class="glass-card p-4">
                             <h5 class="fw-bold text-primary mb-3">AI Insights</h5>
                             <div class="d-flex flex-column gap-2" id="insightsContainer">
-                                <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                                <div class="p-3 rounded-3 border" style="background: rgba(128,128,128,0.05); border-color: var(--card-border) !important;">
                                     <div class="d-flex align-items-start gap-2">
                                         <i class="bi bi-lightbulb text-warning mt-1"></i>
                                         <div>
@@ -260,7 +260,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                                <div class="p-3 rounded-3 border" style="background: rgba(128,128,128,0.05); border-color: var(--card-border) !important;">
                                     <div class="d-flex align-items-start gap-2">
                                         <i class="bi bi-lightning-charge text-info mt-1"></i>
                                         <div>
