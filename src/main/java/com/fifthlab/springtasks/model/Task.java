@@ -35,8 +35,13 @@ public class Task {
     // New fields for dashboard and auth
     private LocalDateTime dueDate;
     
+    @Column(name = "categoryId")
     private Long categoryId;
-    
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "categoryId", insertable = false, updatable = false)
+    private Category category;
+
     private String priority;
     
     private String username;

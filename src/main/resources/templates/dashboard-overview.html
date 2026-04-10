@@ -59,19 +59,18 @@
                 <div th:replace="~{fragments/dashboard-components :: todaysTasks}"></div>
 
                 <div class="row g-4">
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <!-- Task Progress -->
                         <div th:replace="~{fragments/dashboard-components :: taskProgress}"></div>
-                    </div>
-                    <div class="col-md-6">
-                        <!-- Recent Tasks -->
-                        <div th:replace="~{fragments/dashboard-components :: recentTasks}"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Right Column (Sidebar context on Desktop) -->
             <div class="col-12 col-xl-4 d-flex flex-column gap-4">
+                <!-- Recent Tasks -->
+                <div th:replace="~{fragments/dashboard-components :: recentTasks}"></div>
+
                 <!-- Quick Actions -->
                 <div th:replace="~{fragments/dashboard-components :: quickActions}"></div>
 

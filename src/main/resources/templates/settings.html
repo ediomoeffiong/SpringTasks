@@ -690,6 +690,27 @@
 
                 const theme = element.getAttribute('data-theme');
                 
+                // Update Global App State
+                if (theme === 'system') {
+                    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                    localStorage.removeItem('theme'); // Reset to let system take over
+                } else {
+                    document.documentElement.setAttribute('data-theme', theme);
+                    localStorage.setItem('theme', theme);
+                }
+                
+                // Sync Sticky Toggle Icon if it exists
+                const themeIcon = document.getElementById('themeIcon');
+                if (themeIcon) {
+                    const currentActualTheme = document.documentElement.getAttribute('data-theme');
+                    if (currentActualTheme === 'dark') {
+                        themeIcon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
+                    } else {
+                        themeIcon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
+                    }
+                }
+
                 await fetch('/api/user/theme', {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},

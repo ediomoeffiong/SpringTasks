@@ -19,6 +19,7 @@ public class TaskController {
 
     private final TaskService taskService;
     private final DashboardService dashboardService;
+    private final com.fifthlab.springtasks.service.CategoryService categoryService;
 
     @GetMapping("/")
     public String index() {
@@ -79,6 +80,7 @@ public class TaskController {
     @GetMapping("/tasks/new")
     public String newTaskForm(Model model) {
         model.addAttribute("task", new Task());
+        model.addAttribute("categories", categoryService.findAll());
         return "task-form";
     }
 
@@ -97,6 +99,7 @@ public class TaskController {
         Task task = taskService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid task Id:" + id));
         model.addAttribute("task", task);
+        model.addAttribute("categories", categoryService.findAll());
         return "task-form";
     }
 

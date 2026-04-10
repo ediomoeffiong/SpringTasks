@@ -64,17 +64,61 @@ public class DashboardService {
                         .build())
                 .collect(Collectors.toList());
 
+        // Trends Calculation
+        LocalDateTime lastWeek = now.minusDays(7);
+        LocalDateTime twoWeeksAgo = now.minusDays(14);
+        
+        long currentPeriodTotal = taskRepository.countByUsernameAndCreatedAtBetween(username, lastWeek, now);
+        long previousPeriodTotal = taskRepository.countByUsernameAndCreatedAtBetween(username, twoWeeksAgo, lastWeek);
+        
+        String totalTasksTrend = calculateTrend(currentPeriodTotal, previousPeriodTotal);
+        
+        // Dynamic Comments
+        String completedComment = getCompletedComment(completedTasks, totalTasks);
+        String pendingComment = getPendingComment(pendingTasks);
+        String overdueComment = getOverdueComment(overdueTasks);
+
         return new DashboardResponseDTO(
                 totalTasks,
                 completedTasks,
                 pendingTasks,
                 overdueTasks,
                 completionRate,
+                totalTasksTrend,
+                completedComment,
+                pendingComment,
+                overdueComment,
                 recentTasks,
                 categoryBreakdown,
                 upcomingDeadlines,
                 activityFeed
         );
+    }
+
+    private String calculateTrend(long current, long previous) {
+        if (previous == 0) return current > 0 ? "+100% from last week" : "0% from last week";
+        long diff = current - previous;
+        double pct = (double) diff / previous * 100;
+        return String.format("%s%.0f%% from last week", diff >= 0 ? "+" : "", pct);
+    }
+
+    private String getCompletedComment(long completed, long total) {
+        if (total == 0) return "Start your journey today!";
+        double rate = (double) completed / total;
+        if (rate >= 0.8) return "You're on fire! 🔥";
+        if (rate >= 0.5) return "Great job keeping up!";
+        return "Keep pushing forward!";
+    }
+
+    private String getPendingComment(long pending) {
+        if (pending == 0) return "All caught up! 🎉";
+        if (pending > 10) return "Quite a lot on your plate.";
+        return "Manageable workload.";
+    }
+
+    private String getOverdueComment(long overdue) {
+        if (overdue == 0) return "No overdue tasks. Perfect!";
+        return overdue + " tasks need immediate attention!";
     }
     
     public String getCurrentUsername() {

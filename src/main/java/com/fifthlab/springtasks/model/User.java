@@ -56,6 +56,15 @@ public class User {
     @Column(name = "theme_preference")
     private String themePreference = "system";
 
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "banner_url")
+    private String bannerUrl;
+
+    @Column(name = "job_title")
+    private String jobTitle;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

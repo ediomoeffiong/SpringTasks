@@ -26,6 +26,13 @@ public class UserRestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/activities")
+    public ResponseEntity<?> getUserActivities(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        return ResponseEntity.ok(userService.getActivities(org.springframework.data.domain.PageRequest.of(page, size)));
+    }
+
     @PutMapping("/profile")
     public ResponseEntity<User> updateProfile(@RequestBody User user) {
         User saved = userService.updateProfile(user);

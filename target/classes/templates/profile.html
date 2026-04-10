@@ -386,21 +386,22 @@
 
             <!-- Main Profile Header Card -->
             <div class="glass-card mb-4">
-                <div class="profile-banner"></div>
+                <div class="profile-banner" th:style="${user != null and user.bannerUrl != null} ? 'background: url(' + ${user.bannerUrl} + ') center/cover;' : ''"></div>
                 <div class="profile-header-content">
                     <div class="profile-avatar-wrapper">
-                        <!-- Placeholder Initials -->
-                        <div class="profile-avatar-placeholder" id="displayInitials">--</div>
+                        <!-- Real Avatar or Placeholder -->
+                        <img th:if="${user != null and user.avatarUrl != null}" th:src="${user.avatarUrl}" class="w-100 h-100 object-fit-cover" id="displayAvatar">
+                        <div th:unless="${user != null and user.avatarUrl != null}" class="profile-avatar-placeholder" id="displayInitials" th:text="${user != null ? #strings.substring(user.fullName != null ? user.fullName : user.username, 0, 1).toUpperCase() : '--'}">--</div>
                     </div>
 
                     <div class="profile-user-info">
-                        <h1 class="profile-name" id="displayFullName">Loading...</h1>
-                        <div class="profile-username" id="displayUsername">@loading</div>
-                        <p class="profile-bio" id="displayBio">Loading your biography details...</p>
+                        <h1 class="profile-name" id="displayFullName" th:text="${user != null ? (user.fullName != null ? user.fullName : user.username) : 'User'}">Loading...</h1>
+                        <div class="profile-username" id="displayUsername" th:text="'@' + ${user != null ? user.username : 'username'}">@loading</div>
+                        <p class="profile-bio" id="displayBio" th:text="${user != null and user.bio != null ? user.bio : 'No bio available.'}">Loading your biography details...</p>
 
                         <div class="profile-meta">
-                            <span id="displayLocation"><i class="bi bi-geo-alt-fill me-1"></i> --</span>
-                            <span id="displayJoinDate"><i class="bi bi-calendar3 me-1"></i> Joined --</span>
+                            <span id="displayLocation"><i class="bi bi-geo-alt-fill me-1"></i> <span th:text="${user != null and user.location != null ? user.location : 'Location not set'}">--</span></span>
+                            <span id="displayJoinDate"><i class="bi bi-calendar3 me-1"></i> Joined <span th:text="${user != null ? #temporals.format(user.createdAt, 'MMM yyyy') : '--'}">--</span></span>
                         </div>
                     </div>
 
@@ -426,23 +427,23 @@
                             <ul class="info-list">
                                 <li class="info-item">
                                     <span class="info-label">Full Name</span>
-                                    <span class="info-value" id="infoFullName">--</span>
+                                    <span class="info-value" id="infoFullName" th:text="${user != null and user.fullName != null ? user.fullName : 'Not specified'}">Not specified</span>
                                 </li>
                                 <li class="info-item">
                                     <span class="info-label">Username</span>
-                                    <span class="info-value" id="infoUsername">@--</span>
+                                    <span class="info-value" id="infoUsername" th:text="'@' + ${user != null ? user.username : '--'}">@--</span>
                                 </li>
                                 <li class="info-item">
                                     <span class="info-label">Email Address</span>
-                                    <span class="info-value" id="infoEmail"><i class="bi bi-envelope"></i> --</span>
+                                    <span class="info-value" id="infoEmail"><i class="bi bi-envelope"></i> <span th:text="${user != null ? user.email : '--'}">--</span></span>
                                 </li>
                                 <li class="info-item">
                                     <span class="info-label">Location</span>
-                                    <span class="info-value" id="infoLocation"><i class="bi bi-globe-americas"></i> --</span>
+                                    <span class="info-value" id="infoLocation"><i class="bi bi-globe-americas"></i> <span th:text="${user != null and user.location != null ? user.location : 'Not specified'}">Not specified</span></span>
                                 </li>
                                 <li class="info-item">
                                     <span class="info-label">About</span>
-                                    <span class="info-value text-muted" style="font-size: 0.9rem;" id="infoBio">--</span>
+                                    <span class="info-value text-muted" style="font-size: 0.9rem;" id="infoBio" th:text="${user != null and user.bio != null ? user.bio : 'Not specified'}">Not specified</span>
                                 </li>
                             </ul>
                         </div>
@@ -460,7 +461,7 @@
                                     <h3 class="stat-title">Total Tasks</h3>
                                     <div class="stat-icon icon-blue"><i class="bi bi-collection"></i></div>
                                 </div>
-                                <div class="stat-value" id="statTotalTasks">0</div>
+                                <div class="stat-value" id="statTotalTasks" th:text="${stats != null ? stats.totalTasks : 0}">0</div>
                             </div>
                         </div>
                         <div class="col-md-6 col-xl-3">
@@ -469,7 +470,7 @@
                                     <h3 class="stat-title">Completed</h3>
                                     <div class="stat-icon icon-green"><i class="bi bi-check-circle"></i></div>
                                 </div>
-                                <div class="stat-value" id="statCompleted">0</div>
+                                <div class="stat-value" id="statCompleted" th:text="${stats != null ? stats.completedTasks : 0}">0</div>
                             </div>
                         </div>
                         <div class="col-md-6 col-xl-3">
@@ -478,7 +479,7 @@
                                     <h3 class="stat-title">Pending</h3>
                                     <div class="stat-icon icon-orange"><i class="bi bi-hourglass-split"></i></div>
                                 </div>
-                                <div class="stat-value" id="statPending">0</div>
+                                <div class="stat-value" id="statPending" th:text="${stats != null ? stats.pendingTasks : 0}">0</div>
                             </div>
                         </div>
                         <div class="col-md-6 col-xl-3">
@@ -487,7 +488,7 @@
                                     <h3 class="stat-title">Success Rate</h3>
                                     <div class="stat-icon icon-purple"><i class="bi bi-graph-up-arrow"></i></div>
                                 </div>
-                                <div class="stat-value" id="statSuccessRate">0%</div>
+                                <div class="stat-value" id="statSuccessRate" th:text="${stats != null ? stats.completionRate + '%' : '0%'}">0%</div>
                             </div>
                         </div>
                     </div>
@@ -498,49 +499,17 @@
                             <i class="bi bi-activity"></i> Recent Activity
                         </div>
                         <div class="card-body-styled">
-                            <div class="activity-feed">
-
-                                <div class="activity-item">
-                                    <div class="activity-marker complete"></div>
-                                    <div class="activity-content">
-                                        <div class="activity-text">Completed the task <strong>"Review Frontend
-                                                Layouts"</strong></div>
-                                        <div class="activity-time"><i class="bi bi-clock"></i> 2 hours ago</div>
-                                    </div>
+                            <div class="activity-feed" id="profileActivityFeed">
+                                <div class="text-muted p-4 text-center">
+                                    <i class="bi bi-hourglass-split d-block fs-3 mb-2 opacity-50"></i>
+                                    Updating activities...
                                 </div>
-
-                                <div class="activity-item">
-                                    <div class="activity-marker create"></div>
-                                    <div class="activity-content">
-                                        <div class="activity-text">Created a new task <strong>"Implement User Profile
-                                                UI"</strong></div>
-                                        <div class="activity-time"><i class="bi bi-clock"></i> 5 hours ago</div>
-                                    </div>
-                                </div>
-
-                                <div class="activity-item">
-                                    <div class="activity-marker update"></div>
-                                    <div class="activity-content">
-                                        <div class="activity-text">Updated details for task <strong>"Fix Settings
-                                                Routing Issue"</strong></div>
-                                        <div class="activity-time"><i class="bi bi-clock"></i> Yesterday</div>
-                                    </div>
-                                </div>
-
-                                <div class="activity-item">
-                                    <div class="activity-marker complete"></div>
-                                    <div class="activity-content">
-                                        <div class="activity-text">Completed the task <strong>"Integrate Bootstrap
-                                                Modals"</strong></div>
-                                        <div class="activity-time"><i class="bi bi-clock"></i> Mar 14, 2026</div>
-                                    </div>
-                                </div>
-
                             </div>
 
                             <div class="text-center mt-4">
-                                <button class="btn btn-link text-muted text-decoration-none fw-bold">Load More
-                                    Activity</button>
+                                <button id="loadMoreActivityBtn" class="btn btn-link text-muted text-decoration-none fw-bold" onclick="loadActivities()">
+                                    Load More Activity
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -567,22 +536,30 @@
                             <div class="row g-4">
                                 <div class="col-md-6">
                                     <label for="editFullName" class="form-label fw-bold text-secondary mb-1">Full Name</label>
-                                    <input type="text" class="form-control bg-light" id="editFullName" placeholder="e.g. John Doe">
+                                    <input type="text" class="form-control bg-light" id="editFullName" placeholder="e.g. John Doe" th:value="${user != null ? user.fullName : ''}">
                                 </div>
                                 <div class="col-md-6">
                                     <label for="editUsername" class="form-label fw-bold text-secondary mb-1">Username (Read Only)</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0 text-muted">@</span>
-                                        <input type="text" class="form-control border-start-0 ps-0 bg-light" id="editUsername" readonly>
+                                        <input type="text" class="form-control border-start-0 ps-0 bg-light" id="editUsername" readonly th:value="${user != null ? user.username : ''}">
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <label for="editLocation" class="form-label fw-bold text-secondary mb-1">Location</label>
-                                    <input type="text" class="form-control bg-light" id="editLocation" placeholder="e.g. New York, USA">
+                                    <input type="text" class="form-control bg-light" id="editLocation" placeholder="e.g. New York, USA" th:value="${user != null ? user.location : ''}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editAvatarUrl" class="form-label fw-bold text-secondary mb-1">Profile Picture URL</label>
+                                    <input type="text" class="form-control bg-light" id="editAvatarUrl" placeholder="https://example.com/photo.jpg" th:value="${user != null ? user.avatarUrl : ''}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editBannerUrl" class="form-label fw-bold text-secondary mb-1">Cover Photo URL</label>
+                                    <input type="text" class="form-control bg-light" id="editBannerUrl" placeholder="https://example.com/banner.jpg" th:value="${user != null ? user.bannerUrl : ''}">
                                 </div>
                                 <div class="col-12">
                                     <label for="editBio" class="form-label fw-bold text-secondary mb-1">Bio</label>
-                                    <textarea class="form-control bg-light" id="editBio" rows="4" placeholder="Tell us a little about yourself..."></textarea>
+                                    <textarea class="form-control bg-light" id="editBio" rows="4" placeholder="Tell us a little about yourself..." th:text="${user != null ? user.bio : ''}"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -598,43 +575,100 @@
     </div>
     
     <script layout:fragment="pageScripts">
+        let currentActivityPage = 0;
+        const activitiesPerPage = 5;
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Load User profile
-                const userRes = await fetch('/api/user/me');
-                if (userRes.ok) {
-                    const user = await userRes.json();
-                    populateUserProfile(user);
-                }
-
-                // Load Dashboard stats for the cards
-                const dashRes = await fetch('/api/dashboard');
-                if (dashRes.ok) {
-                    const dashboard = await dashRes.json();
-                    populateUserStats(dashboard);
-                }
-            } catch(e) { console.error('Error loading profile page', e); }
+                // Initial loads (handled by Thymeleaf now, but keeps JS up to date)
+                await loadActivities(true);
+            } catch(e) { console.error('Error loading activity feed', e); }
         });
+
+        async function loadActivities(reset = false) {
+            if (reset) {
+                currentActivityPage = 0;
+                document.getElementById('profileActivityFeed').innerHTML = '';
+            }
+
+            try {
+                const res = await fetch(`/api/user/activities?page=${currentActivityPage}&size=${activitiesPerPage}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const feed = document.getElementById('profileActivityFeed');
+                    
+                    if (data.content && data.content.length > 0) {
+                        data.content.forEach(activity => {
+                            const item = createActivityItem(activity);
+                            feed.appendChild(item);
+                        });
+                        
+                        currentActivityPage++;
+                        
+                        // Hide load more button if last page
+                        const loadMoreBtn = document.getElementById('loadMoreActivityBtn');
+                        if (data.last) {
+                            loadMoreBtn.style.display = 'none';
+                        } else {
+                            loadMoreBtn.style.display = 'block';
+                        }
+                    } else if (reset) {
+                        feed.innerHTML = '<div class="text-muted p-3 text-center">No recent activity</div>';
+                        document.getElementById('loadMoreActivityBtn').style.display = 'none';
+                    }
+                }
+            } catch(e) { console.error('Error fetching activities', e); }
+        }
+
+        function createActivityItem(activity) {
+            const div = document.createElement('div');
+            div.className = 'activity-item';
+            
+            const markerClass = activity.type === 'completed' ? 'complete' : (activity.type === 'created' ? 'create' : 'update');
+            const timeStr = activity.createdAt ? formatTimeAgo(new Date(activity.createdAt)) : 'Just now';
+            
+            div.innerHTML = `
+                <div class="activity-marker ${markerClass}"></div>
+                <div class="activity-content">
+                    <div class="activity-text">${activity.message || (activity.action + ' task "' + activity.taskTitle + '"')}</div>
+                    <div class="activity-time"><i class="bi bi-clock"></i> ${timeStr}</div>
+                </div>
+            `;
+            return div;
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+            if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+            return date.toLocaleDateString();
+        }
 
         function populateUserProfile(user) {
             const displayName = user.fullName || user.username;
             
             document.getElementById('displayFullName').innerText = displayName;
             document.getElementById('displayUsername').innerText = '@' + user.username;
-            document.getElementById('displayBio').innerText = user.bio || 'Your bio is currently empty. Add one to complete your profile!';
-            document.getElementById('displayLocation').innerHTML = `<i class="bi bi-geo-alt-fill me-1"></i> ${user.location || 'Location not specified'}`;
+            document.getElementById('displayBio').innerText = user.bio || 'No bio available.';
+            document.getElementById('displayLocation').innerHTML = `<i class="bi bi-geo-alt-fill me-1"></i> ${user.location || 'Location not set'}`;
             
-            // Format joined date
-            if (user.createdAt) {
-                const date = new Date(user.createdAt);
-                document.getElementById('displayJoinDate').innerHTML = `<i class="bi bi-calendar3 me-1"></i> Joined ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+            // Avatar/Banner Update
+            if (user.avatarUrl) {
+                const wrapper = document.querySelector('.profile-avatar-wrapper');
+                wrapper.innerHTML = `<img src="${user.avatarUrl}" class="w-100 h-100 object-fit-cover" id="displayAvatar">`;
+            } else {
+                const wrapper = document.querySelector('.profile-avatar-wrapper');
+                const initials = (user.fullName || user.username).substring(0, 1).toUpperCase();
+                wrapper.innerHTML = `<div class="profile-avatar-placeholder" id="displayInitials">${initials}</div>`;
             }
 
-            // Form fields
-            document.getElementById('editFullName').value = user.fullName || '';
-            document.getElementById('editUsername').value = user.username;
-            document.getElementById('editLocation').value = user.location || '';
-            document.getElementById('editBio').value = user.bio || '';
+            if (user.bannerUrl) {
+                document.querySelector('.profile-banner').style.background = `url(${user.bannerUrl}) center/cover`;
+            }
             
             // Info List
             document.getElementById('infoFullName').innerText = user.fullName || 'Not specified';
@@ -642,16 +676,6 @@
             document.getElementById('infoEmail').innerHTML = `<i class="bi bi-envelope"></i> ${user.email}`;
             document.getElementById('infoLocation').innerHTML = `<i class="bi bi-globe-americas"></i> ${user.location || 'Not specified'}`;
             document.getElementById('infoBio').innerText = user.bio || 'Not specified';
-            
-            const initials = displayName.substring(0, 2).toUpperCase();
-            document.getElementById('displayInitials').innerText = initials;
-        }
-
-        function populateUserStats(dash) {
-            document.getElementById('statTotalTasks').innerText = dash.totalTasks;
-            document.getElementById('statCompleted').innerText = dash.completedTasks;
-            document.getElementById('statPending').innerText = dash.pendingTasks;
-            document.getElementById('statSuccessRate').innerText = dash.completionRate + '%';
         }
 
         async function submitProfileEdit() {
@@ -663,7 +687,9 @@
             const payload = {
                 fullName: document.getElementById('editFullName').value,
                 location: document.getElementById('editLocation').value,
-                bio: document.getElementById('editBio').value
+                bio: document.getElementById('editBio').value,
+                avatarUrl: document.getElementById('editAvatarUrl').value,
+                bannerUrl: document.getElementById('editBannerUrl').value
             };
             
             try {
@@ -677,16 +703,11 @@
                     const updatedUser = await res.json();
                     populateUserProfile(updatedUser);
                     
-                    // Close the modal cleanly
                     const modalEl = document.getElementById('editProfileModal');
                     const modal = bootstrap.Modal.getInstance(modalEl);
                     if(modal) modal.hide();
-                } else {
-                    console.error('Failed to update profile');
                 }
-            } catch(e) { 
-                console.error('Error saving profile', e); 
-            } finally {
+            } catch(e) { console.error('Error saving profile', e); } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
             }

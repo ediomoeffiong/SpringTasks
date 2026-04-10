@@ -275,6 +275,45 @@
                 color: var(--primary-color);
             }
         }
+
+        /* Floating Theme Toggle */
+        #themeToggleContainer {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+        }
+
+        #themeToggleContainer.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        #themeToggle {
+            width: 3.5rem;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            background: var(--bg-glass) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border) !important;
+            color: var(--text-main);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #themeToggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            background: var(--primary-color) !important;
+            color: #ffffff;
+            border-color: transparent !important;
+        }
     </style>
 </head>
 
@@ -330,14 +369,15 @@
             </main>
 
             <footer class="py-4 mt-auto">
-                <div class="container text-center text-muted-theme d-flex justify-content-between align-items-center">
-                    <small>&copy; 2026 SpringTasks.</small>
-                    <button class="btn btn-sm btn-outline-secondary rounded-circle" id="themeToggle" title="Toggle Dark/Light Mode">
-                        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
-                    </button>
-                </div>
             </footer>
         </div>
+    </div>
+    
+    <!-- Floating Theme Toggle Container -->
+    <div id="themeToggleContainer">
+        <button class="btn rounded-circle" id="themeToggle" title="Toggle Dark/Light Mode">
+            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+        </button>
     </div>
     
     <!-- Render Toasts -->
@@ -376,17 +416,38 @@
             }
 
             if (themeToggleBtn) {
-                themeToggleBtn.addEventListener('click', function() {
+                const themeContainer = document.getElementById('themeToggleContainer');
+                let fadeTimeout;
+
+                const showToggle = () => {
+                    themeContainer.classList.add('visible');
+                    clearTimeout(fadeTimeout);
+                    fadeTimeout = setTimeout(() => {
+                        themeContainer.classList.remove('visible');
+                    }, 5000);
+                };
+
+                // Show on scroll
+                window.addEventListener('scroll', showToggle, { passive: true });
+
+                themeToggleBtn.addEventListener('click', async function() {
                     let theme = document.documentElement.getAttribute('data-theme');
-                    if (theme === 'dark') {
-                        document.documentElement.setAttribute('data-theme', 'light');
-                        localStorage.setItem('theme', 'light');
-                        themeIcon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('theme', 'dark');
-                        themeIcon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
-                    }
+                    const newTheme = theme === 'dark' ? 'light' : 'dark';
+                    
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    themeIcon.classList.replace(theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill', 
+                                              newTheme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill');
+                    
+                    try {
+                        await fetch('/api/user/theme', {
+                            method: 'PUT',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ themePreference: newTheme })
+                        });
+                    } catch(e) { console.error('Failed to sync theme to backend', e); }
+                    
+                    showToggle(); // Keep visible when interacted with
                 });
             }
 

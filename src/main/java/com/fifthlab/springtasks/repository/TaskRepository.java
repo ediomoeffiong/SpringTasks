@@ -19,6 +19,10 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     
     long countByUsernameAndCompletedFalseAndDueDateBefore(String username, LocalDateTime date);
     
+    long countByUsernameAndCreatedAtBetween(String username, LocalDateTime start, LocalDateTime end);
+    
+    long countByUsernameAndCompletedAndUpdatedAtBetween(String username, boolean completed, LocalDateTime start, LocalDateTime end);
+    
     List<Task> findTop10ByUsernameOrderByCreatedAtDesc(String username);
     
     List<Task> findByUsernameAndCompletedFalseAndDueDateBetweenOrderByDueDateAsc(String username, LocalDateTime start, LocalDateTime end);

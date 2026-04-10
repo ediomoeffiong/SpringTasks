@@ -1,8 +1,12 @@
 package com.fifthlab.springtasks.service;
 
+import com.fifthlab.springtasks.model.Notification;
 import com.fifthlab.springtasks.model.User;
+import com.fifthlab.springtasks.repository.NotificationRepository;
 import com.fifthlab.springtasks.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +18,7 @@ import java.util.Optional;
 @SuppressWarnings("null")
 public class UserService {
     private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
     private final PasswordEncoder passwordEncoder;
 
     public String getCurrentUsername() {
@@ -35,7 +40,16 @@ public class UserService {
         user.setFullName(updateData.getFullName());
         user.setLocation(updateData.getLocation());
         user.setBio(updateData.getBio());
+        user.setAvatarUrl(updateData.getAvatarUrl());
+        user.setBannerUrl(updateData.getBannerUrl());
+        user.setJobTitle(updateData.getJobTitle());
         return userRepository.save(user);
+    }
+
+    public Page<Notification> getActivities(Pageable pageable) {
+        String username = getCurrentUsername();
+        if (username == null) return Page.empty();
+        return notificationRepository.findByUsernameOrderByCreatedAtDesc(username, pageable);
     }
 
     public User updateSettings(User updateData) {

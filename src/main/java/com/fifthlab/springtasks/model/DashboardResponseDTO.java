@@ -15,6 +15,10 @@ public class DashboardResponseDTO {
     private long pendingTasks;
     private long overdueTasks;
     private double completionRate;
+    private String totalTasksTrend;
+    private String completedComment;
+    private String pendingComment;
+    private String overdueComment;
     private List<TaskDTO> recentTasks;
     private List<CategoryBreakdownDTO> categoryBreakdown;
     private List<TaskDTO> upcomingDeadlines;

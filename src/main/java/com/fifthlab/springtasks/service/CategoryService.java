@@ -26,9 +26,23 @@ public class CategoryService {
 
     public List<Category> findAll() {
         String username = getCurrentUsername();
+        ensureUncategorizedExists(username);
         return categoryRepository.findAll().stream()
                 .filter(c -> username.equals(c.getUsername()))
                 .toList(); 
+    }
+
+    public Category ensureUncategorizedExists(String username) {
+        return categoryRepository.findByNameAndUsername("Uncategorized", username)
+                .orElseGet(() -> {
+                    Category uncategorized = Category.builder()
+                            .name("Uncategorized")
+                            .description("Default category for tasks")
+                            .color("#94a3b8")
+                            .username(username)
+                            .build();
+                    return categoryRepository.save(uncategorized);
+                });
     }
 
     public Optional<Category> findById(@NonNull Long id) {

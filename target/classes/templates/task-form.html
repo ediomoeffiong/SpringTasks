@@ -41,6 +41,16 @@
                                 id="description" rows="5" placeholder="Add some context..."></textarea>
                         </div>
                         
+                        <!-- Category Section -->
+                        <div class="mb-4">
+                            <label for="category" class="form-label fw-bold">Category</label>
+                            <select th:field="*{categoryId}" class="form-select bg-light border-0 px-4 py-3" id="category">
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" 
+                                        th:selected="${cat.id == task.categoryId}"></option>
+                            </select>
+                        </div>
+                        
+                        <!-- Date & Priority Row -->
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <label for="dueDate" class="form-label fw-bold">Due Date (Optional)</label>

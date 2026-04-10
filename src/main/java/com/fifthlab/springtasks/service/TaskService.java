@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.lang.NonNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +19,7 @@ import org.springframework.lang.NonNull;
 public class TaskService {
     private final TaskRepository taskRepository;
     private final NotificationService notificationService;
+    private final CategoryService categoryService;
 
     private String getCurrentUsername() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
@@ -47,9 +50,16 @@ public class TaskService {
         return taskRepository.findById(id);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "dashboardData", key = "#task.username", condition = "#task.username != null"),
+        @CacheEvict(value = "dashboardData", key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()", condition = "#task.username == null")
+    })
     public Task save(Task task) {
         if (task.getUsername() == null) {
             task.setUsername(getCurrentUsername());
+        }
+        if (task.getCategoryId() == null) {
+            task.setCategoryId(categoryService.ensureUncategorizedExists(task.getUsername()).getId());
         }
         if (task.getId() != null) {
             // Update flow
@@ -77,10 +87,12 @@ public class TaskService {
         }
     }
 
+    @CacheEvict(value = "dashboardData", key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public void deleteById(@NonNull Long id) {
         taskRepository.deleteById(id);
     }
 
+    @CacheEvict(value = "dashboardData", key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public void toggleStatus(@NonNull Long id) {
         findById(id).ifPresent(t -> {
             boolean isNowCompleted = !t.isCompleted();
