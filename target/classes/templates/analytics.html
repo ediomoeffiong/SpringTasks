@@ -201,22 +201,22 @@
                         <canvas id="distributionChart"></canvas>
                         <!-- Center Text for Doughnut -->
                         <div class="position-absolute text-center" style="pointer-events: none;">
-                            <h3 class="text-primary fw-bold mb-0">124</h3>
+                            <h3 class="text-primary fw-bold mb-0" id="distTotal">0</h3>
                             <span class="text-muted small">Total</span>
                         </div>
                     </div>
                     <div class="d-flex justify-content-center gap-4 mt-3">
                         <div class="text-center">
                             <i class="bi bi-circle-fill text-success small me-1"></i>
-                            <span class="text-primary small fw-bold">71%</span>
+                            <span class="text-primary small fw-bold" id="distCompPer">0%</span>
                         </div>
                         <div class="text-center">
                             <i class="bi bi-circle-fill text-info small me-1"></i>
-                            <span class="text-primary small fw-bold">23%</span>
+                            <span class="text-primary small fw-bold" id="distPendPer">0%</span>
                         </div>
                         <div class="text-center">
                             <i class="bi bi-circle-fill text-danger small me-1"></i>
-                            <span class="text-primary small fw-bold">6%</span>
+                            <span class="text-primary small fw-bold" id="distOverPer">0%</span>
                         </div>
                     </div>
                 </div>
@@ -250,7 +250,7 @@
                     <div class="col-12 col-md-6 col-xl-12">
                         <div class="glass-card p-4">
                             <h5 class="fw-bold text-primary mb-3">AI Insights</h5>
-                            <div class="d-flex flex-column gap-2">
+                            <div class="d-flex flex-column gap-2" id="insightsContainer">
                                 <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
                                     <div class="d-flex align-items-start gap-2">
                                         <i class="bi bi-lightbulb text-warning mt-1"></i>
@@ -287,11 +287,8 @@
 
         </div>
 
-        <!-- Chart.js Logic Script -->
+        <!-- 290. Chart.js Logic Script -->
         <script>
-            let categories = [];
-            let tasks = [];
-            
             Chart.defaults.color = '#94a3b8';
             Chart.defaults.font.family = "'Inter', system-ui, -apple-system, sans-serif";
             const gridOptions = { color: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' };
@@ -306,69 +303,66 @@
             
             async function loadData() {
                 try {
-                    const [catRes, taskRes] = await Promise.all([
-                        fetch('/api/categories'),
-                        fetch('/api/tasks')
-                    ]);
-                    
-                    if (catRes.ok) categories = await catRes.json();
-                    if (taskRes.ok) {
-                        const rawTasks = await taskRes.json();
-                        tasks = rawTasks.map(t => {
-                            let status = t.completed ? 'completed' : 'pending';
-                            const due = t.dueDate ? t.dueDate.split('T')[0] : '';
-                            if (!t.completed && due) {
-                                const dueDateObj = new Date(due);
-                                dueDateObj.setHours(0,0,0,0);
-                                const today = new Date();
-                                today.setHours(0,0,0,0);
-                                if (dueDateObj < today) status = 'overdue';
-                            }
-                            return { ...t, status: status };
-                        });
+                    const res = await fetch('/api/analytics');
+                    if(res.ok) {
+                        const data = await res.json();
+                        renderMetrics(data.summary);
+                        renderCharts(data);
+                        renderCategoryPerformance(data.categoryPerformance);
+                        renderInsights(data.insights);
+                        // Activity feed can still be fetched from dashboard or simplified
+                        loadActivity();
                     }
-                    
-                    calculateMetrics();
-                    initCharts();
-                    renderCategoryPerformance();
-                    renderRecentActivity();
                 } catch(e) {
                     console.error("Failed to load analytics: ", e);
                 }
             }
 
-            function calculateMetrics() {
-                const total = tasks.length;
-                const completed = tasks.filter(t => t.status === 'completed').length;
-                const overdue = tasks.filter(t => t.status === 'overdue').length;
-                const pending = tasks.filter(t => t.status === 'pending').length;
-                const rate = total > 0 ? ((completed / total) * 100).toFixed(1) : 0;
-
-                document.getElementById('valTotalTasks').innerText = total;
-                document.getElementById('valCompleted').innerText = completed;
-                document.getElementById('valPending').innerText = pending;
-                document.getElementById('valOverdue').innerText = overdue;
-                document.getElementById('valCompletionRate').innerText = rate + '%';
-                document.getElementById('barCompletionRate').style.width = rate + '%';
+            function renderMetrics(summary) {
+                document.getElementById('valTotalTasks').innerText = summary.totalTasks;
+                document.getElementById('valCompleted').innerText = summary.completed;
+                document.getElementById('valPending').innerText = summary.pending;
+                document.getElementById('valOverdue').innerText = summary.overdue;
+                document.getElementById('valCompletionRate').innerText = summary.completionRate + '%';
+                document.getElementById('barCompletionRate').style.width = summary.completionRate + '%';
                 
-                // Clear out trends for now since we don't have historical backend comparison
-                document.querySelectorAll('.metric-trend').forEach(el => el.innerHTML = '');
+                // Render trends
+                setTrend('trendTotalTasks', summary.trends.total);
+                setTrend('trendCompleted', summary.trends.completed);
+                setTrend('trendPending', summary.trends.pending);
+                setTrend('trendOverdue', summary.trends.overdue);
             }
 
-            function initCharts() {
-                // 1. Task Distribution
-                const completed = tasks.filter(t => t.status === 'completed').length;
-                const pending = tasks.filter(t => t.status === 'pending').length;
-                const overdue = tasks.filter(t => t.status === 'overdue').length;
-                
-                if(distributionChartInst) distributionChartInst.destroy();
+            function setTrend(id, val) {
+                const el = document.getElementById(id);
+                if(!el || !val) return;
+                const isDown = val.startsWith('-');
+                el.innerText = val + (isDown ? ' vs last month' : ' vs last month');
+                el.className = 'metric-trend ' + (isDown ? 'down' : 'up');
+            }
+
+            function renderCharts(data) {
+                // 1. Distribution Doughnut
                 const ctxDistribution = document.getElementById('distributionChart').getContext('2d');
+                if(distributionChartInst) distributionChartInst.destroy();
+                // Update text elements
+                const total = data.summary.totalTasks || 0;
+                document.getElementById('distTotal').innerText = total;
+                
+                const compPer = total > 0 ? Math.round((data.distribution.completed / total) * 100) : 0;
+                const pendPer = total > 0 ? Math.round((data.distribution.pending / total) * 100) : 0;
+                const overPer = total > 0 ? Math.round((data.distribution.overdue / total) * 100) : 0;
+                
+                document.getElementById('distCompPer').innerText = compPer + '%';
+                document.getElementById('distPendPer').innerText = pendPer + '%';
+                document.getElementById('distOverPer').innerText = overPer + '%';
+
                 distributionChartInst = new Chart(ctxDistribution, {
                     type: 'doughnut',
                     data: {
                         labels: ['Completed', 'Pending', 'Overdue'],
                         datasets: [{
-                            data: [completed, pending, overdue],
+                            data: [data.distribution.completed, data.distribution.pending, data.distribution.overdue],
                             backgroundColor: ['#34d399', '#38bdf8', '#f87171'],
                             borderWidth: 0,
                             hoverOffset: 4
@@ -377,32 +371,9 @@
                     options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
                 });
 
-                // Helper: Get Last 7 Days Labels & Data
-                const last7Days = [];
-                const last7Counts = [];
-                const todayMidnight = new Date();
-                todayMidnight.setHours(0,0,0,0);
-                
-                for(let i=6; i>=0; i--) {
-                    const d = new Date(todayMidnight);
-                    d.setDate(d.getDate() - i);
-                    last7Days.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
-                    
-                    // Count completed tasks on this day (assuming dueDate or createdAt is completion date, we'll proxy with createdAt or a generalized completion proxy if available. For demo, we proxy with createdAt for completed tasks)
-                    let dayCount = 0;
-                    tasks.forEach(t => {
-                        if(t.status === 'completed' && t.createdAt) {
-                            const tDate = new Date(t.createdAt);
-                            tDate.setHours(0,0,0,0);
-                            if(tDate.getTime() === d.getTime()) dayCount++;
-                        }
-                    });
-                    last7Counts.push(dayCount);
-                }
-
-                // 2. Completion Chart
-                if(completionChartInst) completionChartInst.destroy();
+                // 2. Completion History Line
                 const ctxCompletion = document.getElementById('completionChart').getContext('2d');
+                if(completionChartInst) completionChartInst.destroy();
                 let gradientComplete = ctxCompletion.createLinearGradient(0, 0, 0, 300);
                 gradientComplete.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
                 gradientComplete.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
@@ -410,10 +381,10 @@
                 completionChartInst = new Chart(ctxCompletion, {
                     type: 'line',
                     data: {
-                        labels: last7Days,
+                        labels: data.completionHistory.map(p => p.label),
                         datasets: [{
                             label: 'Tasks Completed',
-                            data: last7Counts,
+                            data: data.completionHistory.map(p => p.value),
                             borderColor: '#6366f1',
                             backgroundColor: gradientComplete,
                             borderWidth: 3,
@@ -426,27 +397,16 @@
                     options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: gridOptions, beginAtZero: true } } }
                 });
 
-                // 3. Productivity Bar (Mon-Sun totals over all time, or current week)
-                // Proxying based on createdAt day of week
-                const dayCounts = [0,0,0,0,0,0,0]; // Sun-Sat format
-                tasks.forEach(t => {
-                    if(t.createdAt) {
-                        const dDay = new Date(t.createdAt).getDay(); // 0 is Sunday
-                        // Shift to Mon=0...Sun=6
-                        const shiftDay = dDay === 0 ? 6 : dDay - 1;
-                        dayCounts[shiftDay]++;
-                    }
-                });
-
-                if(productivityChartInst) productivityChartInst.destroy();
+                // 3. Productivity Bar
                 const ctxProductivity = document.getElementById('productivityChart').getContext('2d');
+                if(productivityChartInst) productivityChartInst.destroy();
                 productivityChartInst = new Chart(ctxProductivity, {
                     type: 'bar',
                     data: {
-                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        labels: data.productivityByDay.map(p => p.label),
                         datasets: [{
-                            label: 'Tasks Created',
-                            data: dayCounts,
+                            label: 'Tasks Completed',
+                            data: data.productivityByDay.map(p => p.value),
                             backgroundColor: 'rgba(56, 189, 248, 0.8)',
                             borderRadius: 4
                         }]
@@ -455,28 +415,23 @@
                 });
             }
 
-            function renderCategoryPerformance() {
+            function renderCategoryPerformance(performance) {
                 const container = document.getElementById('categoryPerformanceContainer');
-                if(categories.length === 0) {
+                if(!performance || performance.length === 0) {
                     container.innerHTML = '<div class="text-muted text-center py-4">No categories created</div>';
                     return;
                 }
 
                 let html = '';
-                categories.forEach(c => {
-                    const catTasks = tasks.filter(t => t.categoryId === c.id);
-                    const totalCat = catTasks.length;
-                    const compCat = catTasks.filter(t => t.status === 'completed').length;
-                    const catRate = totalCat > 0 ? Math.round((compCat / totalCat) * 100) : 0;
-
+                performance.forEach(p => {
                     html += `
                         <div>
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: ${c.color || '#3b82f6'}; font-size:0.5rem;"></i>${c.name}</span>
-                                <span class="text-muted small">${compCat} / ${totalCat} (${catRate}%)</span>
+                                <span class="text-primary small fw-bold"><i class="bi bi-circle-fill me-2" style="color: ${p.color || '#3b82f6'}; font-size:0.5rem;"></i>${p.name}</span>
+                                <span class="text-muted small">${p.completed} / ${p.total} (${p.rate}%)</span>
                             </div>
                             <div class="custom-progress" style="height: 6px;">
-                                <div class="custom-progress-bar" style="width: ${catRate}%; background-color: ${c.color || '#3b82f6'};"></div>
+                                <div class="custom-progress-bar" style="width: ${p.rate}%; background-color: ${p.color || '#3b82f6'};"></div>
                             </div>
                         </div>
                     `;
@@ -484,32 +439,60 @@
                 container.innerHTML = html;
             }
 
-            function renderRecentActivity() {
-                const container = document.getElementById('recentActivityContainer');
-                if(tasks.length === 0) {
-                    container.innerHTML = '<div class="text-muted text-center py-4">No recent activity</div>';
+            function renderInsights(insights) {
+                const insightsContainer = document.getElementById('insightsContainer');
+                if(!insightsContainer || !insights) return;
+                
+                if(insights.length === 0) {
+                    insightsContainer.innerHTML = '<div class="text-muted text-center py-4">No insights yet. Complete more tasks!</div>';
                     return;
                 }
 
-                // Sort by createdAt desc
-                const sorted = [...tasks].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-                const top4 = sorted.slice(0, 4);
-
                 let html = '';
-                top4.forEach((t, index) => {
-                    const color = t.status === 'completed' ? '#34d399' : '#e2e8f0';
-                    const actMsg = t.status === 'completed' ? 'Completed task' : 'Added task';
-                    const timeStr = t.createdAt ? new Date(t.createdAt).toLocaleString(undefined, {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}) : '';
-                    
+                insights.forEach(ins => {
+                    const iconColor = ins.type === 'lightbulb' ? 'text-warning' : 'text-info';
                     html += `
-                        <div class="activity-item ${index === top4.length - 1 ? 'border-0 pb-0' : ''}">
-                            <div class="activity-indicator" style="background: ${color};"></div>
-                            <p class="mb-0 text-primary small fw-bold">${actMsg} "${t.title}"</p>
-                            <span class="text-muted" style="font-size: 0.70rem;">${timeStr}</span>
+                        <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-${ins.type} ${iconColor} mt-1"></i>
+                                <div>
+                                    <p class="text-primary small fw-bold mb-0">${ins.title}</p>
+                                    <p class="text-muted small mb-0">${ins.message}</p>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
-                container.innerHTML = html;
+                insightsContainer.innerHTML = html;
+            }
+
+            async function loadActivity() {
+                const container = document.getElementById('recentActivityContainer');
+                try {
+                    const res = await fetch('/api/tasks');
+                    if(res.ok) {
+                        const tasks = await res.json();
+                        const sorted = tasks.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4);
+                        if(sorted.length === 0) {
+                            container.innerHTML = '<div class="text-muted text-center py-4">No recent activity</div>';
+                            return;
+                        }
+                        let html = '';
+                        sorted.forEach((t, index) => {
+                            const color = t.completed ? '#34d399' : '#e2e8f0';
+                            const actMsg = t.completed ? 'Completed task' : 'Added task';
+                            const timeStr = t.createdAt ? new Date(t.createdAt).toLocaleString(undefined, {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}) : '';
+                            html += `
+                                <div class="activity-item ${index === sorted.length - 1 ? 'border-0 pb-0' : ''}">
+                                    <div class="activity-indicator" style="background: ${color};"></div>
+                                    <p class="mb-0 text-primary small fw-bold">${actMsg} "${t.title}"</p>
+                                    <span class="text-muted" style="font-size: 0.70rem;">${timeStr}</span>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = html;
+                    }
+                } catch(e) {}
             }
         </script>
     </div>

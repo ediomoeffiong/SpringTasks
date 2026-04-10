@@ -1,3 +1,4 @@
+C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\dto\AnalyticsDTO.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\controller\TaskRestController.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\exception\MvcExceptionHandler.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\config\SecurityConfig.java
@@ -11,10 +12,12 @@ C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\ja
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\service\TaskService.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\dto\RegisterRequest.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\repository\NotificationRepository.java
+C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\service\AnalyticsService.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\controller\UserRestController.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\service\CategoryService.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\controller\AuthController.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\exception\GlobalExceptionHandler.java
+C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\controller\AnalyticsRestController.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\controller\GlobalControllerAdvice.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\repository\TaskRepository.java
 C:\Users\Ediomo Emma Effiong\Documents\FifthLab\Projects\SpringTasks\src\main\java\com\fifthlab\springtasks\dto\AuthResponse.java
