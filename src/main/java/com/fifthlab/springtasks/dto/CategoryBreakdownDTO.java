@@ -1,4 +1,4 @@
-package com.fifthlab.springtasks.model;
+package com.fifthlab.springtasks.dto;
 
 public interface CategoryBreakdownDTO {
     String getCategory();

@@ -201,6 +201,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-2" href="#" onclick="setFilter('invitations', event)">
+                                    Invitations <span class="badge bg-info rounded-pill badge-counter" id="invitationCountBadge">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="#" onclick="setFilter('read', event)">Read</a>
                             </li>
                         </ul>
@@ -321,12 +326,32 @@
                     const res = await fetch('/api/notifications');
                     if(res.ok) {
                         const data = await res.json();
-                        notifications = data.map(n => {
-                            const d = new Date(n.createdAt);
-                            const dStr = d.toISOString().split('T')[0];
                             const timeStr = d.toLocaleString(undefined, {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'});
-                            return { ...n, dateGroup: dStr, timestamp: timeStr };
+                            return { ...n, dateGroup: dStr, timestamp: timeStr, isInvitation: false };
                         });
+                        
+                        // Also fetch invitations
+                        const invRes = await fetch('/api/invitations');
+                        if (invRes.ok) {
+                            const invData = await invRes.json();
+                            const mappedInvites = invData.map(inv => {
+                                const d = new Date(inv.createdAt);
+                                const dStr = d.toISOString().split('T')[0];
+                                const timeStr = d.toLocaleString(undefined, {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'});
+                                return {
+                                    id: inv.id,
+                                    title: "Collaboration Invite",
+                                    message: `${inv.sender.username} invited you to collaborate on "${inv.task.title}"`,
+                                    createdAt: inv.createdAt,
+                                    dateGroup: dStr,
+                                    timestamp: timeStr,
+                                    isInvitation: true,
+                                    unread: true // invitations are always "important/unread" till acted upon
+                                };
+                            });
+                            notifications = [...notifications, ...mappedInvites];
+                        }
+
                         renderNotifications();
                     }
                 } catch(e) { console.error("Failed to load notifications", e); }
@@ -340,14 +365,18 @@
                 
                 // Filter
                 let filtered = notifications.filter(n => {
-                    if (currentFilter === 'unread') return n.unread;
+                    if (currentFilter === 'unread') return n.unread && !n.isInvitation;
                     if (currentFilter === 'read') return !n.unread;
+                    if (currentFilter === 'invitations') return n.isInvitation;
                     return true;
                 });
 
                 // Update Badges & Texts
-                const unreadTotal = notifications.filter(n=>n.unread).length;
+                const unreadTotal = notifications.filter(n=>n.unread && !n.isInvitation).length;
+                const invitationTotal = notifications.filter(n=>n.isInvitation).length;
+                
                 document.getElementById('unreadCountBadge').innerText = unreadTotal;
+                document.getElementById('invitationCountBadge').innerText = invitationTotal;
                 if(unreadTotal === 0) document.getElementById('unreadCountBadge').classList.add('bg-secondary', 'bg-opacity-50');
                 else document.getElementById('unreadCountBadge').classList.remove('bg-secondary', 'bg-opacity-50');
                 
@@ -379,6 +408,9 @@
 
                 let html = '';
                 sortedGroups.forEach(dateKey => {
+                    let itemsInGroup = groups[dateKey];
+                    if (itemsInGroup.length === 0) return;
+
                     let headerLabel = dateKey;
                     if(dateKey === todayStr) headerLabel = "Today";
                     else if(dateKey === yesterdayStr) headerLabel = "Yesterday";
@@ -386,39 +418,47 @@
 
                     html += `<div class="date-group-header">${headerLabel}</div>`;
 
-                    groups[dateKey].forEach(n => {
+                    itemsInGroup.forEach(n => {
                         
-                        let iconMapping = getMappingForType(n.type);
+                        let iconMapping = n.isInvitation ? { icon: 'bi-people', colorClass: 'type-system' } : getMappingForType(n.type);
                         let isChecked = selectedIds.has(n.id) ? 'checked' : '';
                         let unreadClass = n.unread ? 'unread' : '';
 
                         html += `
-                            <div class="notification-item ${unreadClass} d-flex align-items-center gap-3" onclick="openDetails(${n.id}, event)">
+                            <div class="notification-item ${unreadClass} d-flex align-items-center gap-3" onclick="${n.isInvitation ? '' : `openDetails(${n.id}, event)`}">
                                 
                                 <div class="custom-checkbox" onclick="event.stopPropagation()">
-                                    <input class="form-check-input" type="checkbox" id="chk-${n.id}" ${isChecked} onchange="toggleSelect(${n.id})">
+                                    ${n.isInvitation ? '' : `<input class="form-check-input" type="checkbox" id="chk-${n.id}" ${isChecked} onchange="toggleSelect(${n.id})">`}
                                 </div>
                                 
                                 <div class="icon-wrapper ${iconMapping.colorClass}">
                                     <i class="bi ${iconMapping.icon} fs-5"></i>
                                 </div>
-
+ 
                                 <div class="flex-grow-1 min-w-0">
                                     <div class="d-flex justify-content-between align-items-baseline mb-1">
                                         <h6 class="text-primary fw-bold mb-0 text-truncate" style="font-size: 0.95rem;">${n.title}</h6>
                                         <span class="text-secondary ms-2 text-nowrap" style="font-size: 0.70rem;">${n.timestamp}</span>
                                     </div>
                                     <p class="text-muted mb-0 text-truncate" style="font-size: 0.85rem;">${n.message}</p>
+                                    
+                                    ${n.isInvitation ? `
+                                    <div class="mt-2 d-flex gap-2">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="acceptInvitation(${n.id})">Accept</button>
+                                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="declineInvitation(${n.id})">Decline</button>
+                                    </div>
+                                    ` : ''}
                                 </div>
-
+ 
                                 <div class="d-flex gap-2 quick-actions ms-2" onclick="event.stopPropagation()">
-                                    ${n.unread 
+                                    ${!n.isInvitation ? (n.unread 
                                         ? `<button class="btn btn-sm btn-icon rounded-circle btn-outline-secondary border-0" title="Mark as Read" onclick="markAsRead(${n.id})"><i class="bi bi-envelope-open text-primary"></i></button>`
                                         : `<button class="btn btn-sm btn-icon rounded-circle btn-outline-secondary border-0" title="Mark as Unread" onclick="markAsUnread(${n.id})"><i class="bi bi-envelope text-muted"></i></button>`
-                                    }
+                                    ) : ''}
+                                    ${n.isInvitation ? '' : `
                                     <button class="btn btn-sm btn-icon rounded-circle btn-outline-secondary border-0" title="Delete" onclick="deleteNotification(${n.id})">
                                         <i class="bi bi-trash text-danger"></i>
-                                    </button>
+                                    </button>`}
                                 </div>
                             </div>
                         `;
@@ -594,6 +634,26 @@
                     await deleteNotification(viewingNotificationId);
                     detailsModal.hide();
                 }
+            }
+
+            // Invitations Logic
+            async function acceptInvitation(id) {
+                try {
+                    const res = await fetch(`/api/invitations/${id}/accept`, { method: 'PATCH' });
+                    if(res.ok) {
+                        alert("Invitation accepted! You now have access to this task.");
+                        loadNotifications();
+                    }
+                } catch(e) { console.error(e); }
+            }
+
+            async function declineInvitation(id) {
+                try {
+                    const res = await fetch(`/api/invitations/${id}/decline`, { method: 'PATCH' });
+                    if(res.ok) {
+                        loadNotifications();
+                    }
+                } catch(e) { console.error(e); }
             }
 
         </script>

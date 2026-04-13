@@ -1,6 +1,6 @@
 package com.fifthlab.springtasks.controller;
 
-import com.fifthlab.springtasks.model.DashboardResponseDTO;
+import com.fifthlab.springtasks.dto.DashboardResponseDTO;
 import com.fifthlab.springtasks.model.User;
 import com.fifthlab.springtasks.service.DashboardService;
 import com.fifthlab.springtasks.service.UserService;

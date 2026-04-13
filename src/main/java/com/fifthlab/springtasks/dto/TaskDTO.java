@@ -1,5 +1,6 @@
-package com.fifthlab.springtasks.model;
+package com.fifthlab.springtasks.dto;
 
+import com.fifthlab.springtasks.model.Task;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,13 +17,16 @@ public class TaskDTO {
     private LocalDateTime dueDate;
     private LocalDateTime createdAt;
     
+    private String username;
+    
     public static TaskDTO fromEntity(Task task) {
         return new TaskDTO(
             task.getId(),
             task.getTitle(),
             task.isCompleted() ? "completed" : "pending",
             task.getDueDate(),
-            task.getCreatedAt()
+            task.getCreatedAt(),
+            task.getUsername()
         );
     }
 }

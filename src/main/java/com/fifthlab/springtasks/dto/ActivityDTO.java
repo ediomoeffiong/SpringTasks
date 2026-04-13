@@ -1,4 +1,4 @@
-package com.fifthlab.springtasks.model;
+package com.fifthlab.springtasks.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

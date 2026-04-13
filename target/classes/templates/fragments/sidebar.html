@@ -43,6 +43,10 @@
                 </a>
             </nav>
             <div class="sidebar-footer">
+                <div class="px-3 py-2 mb-2 d-flex align-items-center gap-2 text-muted">
+                    <i class="bi bi-person-circle fs-5" style="color: var(--primary-color);"></i>
+                    <span class="truncate-text fw-semibold small" th:text="${currentUsername ?: 'Anonymous'}" style="color: #e2e8f0;">Username</span>
+                </div>
                 <form th:action="@{/logout}" method="post" class="m-0">
                     <button type="submit" class="sidebar-link w-100 border-0 bg-transparent text-start logout-link" style="cursor: pointer;">
                         <i class="bi bi-box-arrow-right"></i> Logout

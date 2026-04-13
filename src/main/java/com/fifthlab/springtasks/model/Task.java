@@ -12,6 +12,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.EntityListeners;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "tasks")
@@ -52,5 +57,28 @@ public class Task {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @Builder.Default
+    private List<Milestone> milestones = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "task_collaborators",
+        joinColumns = @JoinColumn(name = "task_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @Builder.Default
+    private Set<User> collaborators = new HashSet<>();
+
+    @Transient
+    public int getCompletionPercentage() {
+        if (milestones == null || milestones.isEmpty()) {
+            return completed ? 100 : 0;
+        }
+        long completedCount = milestones.stream().filter(Milestone::isCompleted).count();
+        return (int) ((completedCount * 100) / milestones.size());
+    }
 }
 

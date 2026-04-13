@@ -1,10 +1,10 @@
 package com.fifthlab.springtasks.service;
 
-import com.fifthlab.springtasks.model.ActivityDTO;
-import com.fifthlab.springtasks.model.CategoryBreakdownDTO;
-import com.fifthlab.springtasks.model.DashboardResponseDTO;
+import com.fifthlab.springtasks.dto.*;
+import com.fifthlab.springtasks.model.Notification;
 import com.fifthlab.springtasks.model.Task;
-import com.fifthlab.springtasks.model.TaskDTO;
+import com.fifthlab.springtasks.repository.NotificationRepository;
+import com.fifthlab.springtasks.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
@@ -14,9 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.fifthlab.springtasks.repository.NotificationRepository;
-import com.fifthlab.springtasks.repository.TaskRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +49,7 @@ public class DashboardService {
                 .collect(Collectors.toList());
 
         // Activity Feed from Notifications
-        List<com.fifthlab.springtasks.model.Notification> recentNotifications = notificationRepository.findByUsernameOrderByCreatedAtDesc(username);
+        List<Notification> recentNotifications = notificationRepository.findByUsernameOrderByCreatedAtDesc(username);
         List<ActivityDTO> activityFeed = recentNotifications.stream()
                 .limit(5)
                 .map(n -> ActivityDTO.builder()
@@ -124,7 +121,7 @@ public class DashboardService {
     public String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
-            return authentication.getName();
+            return authentication.getName().toLowerCase().trim();
         }
         return "defaultUser"; // Fallback if no auth or anonymous
     }

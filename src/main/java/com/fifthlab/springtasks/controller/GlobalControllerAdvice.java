@@ -11,4 +11,13 @@ public class GlobalControllerAdvice {
     public String currentUri(HttpServletRequest request) {
         return request.getRequestURI();
     }
+
+    @ModelAttribute("currentUsername")
+    public String currentUsername() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+            return auth.getName().toLowerCase().trim();
+        }
+        return null;
+    }
 }

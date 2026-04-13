@@ -139,20 +139,6 @@
         .sidebar-task.completed { border-left-color: #34d399; }
         .sidebar-task.overdue { border-left-color: #f87171; }
         .sidebar-task:hover { background: rgba(255,255,255,0.05); }
-
-        /* Modals */
-        .glass-modal .modal-content {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: 1.5rem;
-        }
-        .glass-modal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        
         /* Drag UI Feedback (Optional) */
         .dragging { opacity: 0.5; }
         .drag-over { background: rgba(255,255,255,0.1) !important; }
@@ -262,18 +248,9 @@
                     <div class="modal-body custom-scrollbar text-primary  pt-4 pb-4">
                         <p id="detailDescription" class="mb-0" style="line-height: 1.6;">Full task description goes here.</p>
                     </div>
-                    <div class="modal-footer border-top border-light border-opacity-10 py-3 d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="deleteCurrentTask()">
-                            <i class="bi bi-trash me-1"></i> Delete
-                        </button>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="editCurrentTask()">
-                                <i class="bi bi-pencil me-1"></i> Edit
-                            </button>
-                            <button type="button" class="btn btn-success btn-sm rounded-pill px-3" id="btnDetailsComplete" onclick="toggleCurrentTaskComplete()">
-                                <i class="bi bi-check2"></i> Mark Complete
-                            </button>
-                        </div>
+                    </div>
+                    <div id="modalFooterActions" class="modal-footer border-top border-light border-opacity-10 py-3 d-flex justify-content-between">
+                        <!-- Content dynamic -->
                     </div>
                 </div>
             </div>
@@ -339,6 +316,7 @@
             
             let viewingTaskId = null;
             let editingTaskId = null;
+            const currentUsername = "[[${currentUsername}]]";
 
             // Live Tasks
             let mockTasks = [];
@@ -366,6 +344,7 @@
                             dueDate: due,
                             priority: t.priority || 'Medium',
                             status: status,
+                            username: t.username,
                             createdDate: t.createdAt ? t.createdAt.split('T')[0] : ''
                         };
                     });
@@ -587,14 +566,31 @@
                 prioBadge.className = `badge ${p==='High'?'bg-danger':(p==='Medium'?'bg-warning':'bg-info')} bg-opacity-10`;
                 prioBadge.innerText = p + " Priority";
 
-                // Complete btn
-                const btnComp = document.getElementById('btnDetailsComplete');
-                if(task.status === 'completed') {
-                    btnComp.className="btn btn-outline-warning btn-sm rounded-pill px-3";
-                    btnComp.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Mark Pending';
+                // Ownership Check
+                const isOwner = task.username && task.username.toLowerCase().trim() === currentUsername.toLowerCase().trim();
+                document.getElementById('modalFooterActions').className = isOwner ? 'modal-footer border-top border-light border-opacity-10 py-3 d-flex justify-content-between' : 'modal-footer border-top border-light border-opacity-10 py-3 d-flex justify-content-end';
+                
+                // If not owner, only show Mark Complete (if allowed) or just Close
+                if (!isOwner) {
+                    document.getElementById('modalFooterActions').innerHTML = `
+                        <span class="badge bg-secondary bg-opacity-10 text-muted fw-normal"><i class="bi bi-people me-1"></i> Collaborator (Read-Only)</span>
+                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+                    `;
                 } else {
-                    btnComp.className="btn btn-success btn-sm rounded-pill px-3";
-                    btnComp.innerHTML = '<i class="bi bi-check2"></i> Mark Complete';
+                    document.getElementById('modalFooterActions').innerHTML = `
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="deleteCurrentTask()">
+                            <i class="bi bi-trash me-1"></i> Delete
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="editCurrentTask()">
+                                <i class="bi bi-pencil me-1"></i> Edit
+                            </button>
+                            <button type="button" class="btn ${task.status === 'completed' ? 'btn-outline-warning' : 'btn-success'} btn-sm rounded-pill px-3" id="btnDetailsComplete" onclick="toggleCurrentTaskComplete()">
+                                <i class="bi ${task.status === 'completed' ? 'bi-arrow-counterclockwise' : 'bi-check2'}"></i> 
+                                ${task.status === 'completed' ? 'Mark Pending' : 'Mark Complete'}
+                            </button>
+                        </div>
+                    `;
                 }
 
                 detailsModal.show();

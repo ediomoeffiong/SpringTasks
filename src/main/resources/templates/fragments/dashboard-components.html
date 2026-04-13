@@ -113,7 +113,7 @@
                             <span class="badge fw-normal rounded-pill px-2" th:classappend="${task.status == 'completed'} ? 'text-success bg-success bg-opacity-10' : 'text-warning bg-warning bg-opacity-10'" th:text="${#strings.capitalize(task.status)} + (${task.dueDate != null} ? ' &bull; ' + ${#strings.substring(task.dueDate,0,10)} : '')">Pending</span>
                         </div>
                     </div>
-                    <div class="task-actions transition-hover">
+                    <div class="task-actions transition-hover" th:if="${task.username != null and currentUsername != null and #strings.equalsIgnoreCase(task.username.trim(), currentUsername.trim())}">
                         <a th:href="@{'/tasks/edit/' + ${task.id}}" class="btn btn-sm text-muted border-0 p-1"><i class="bi bi-pencil"></i></a>
                     </div>
                 </div>
@@ -203,6 +203,13 @@
                 <a th:href="@{/settings}" class="card quick-action-card border-0 text-center text-decoration-none p-3 h-100" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05) !important; transition: all 0.2s;">
                     <i class="bi bi-gear text-secondary fs-3 mb-2 d-block"></i>
                     <span class="text-primary small fw-medium">Settings</span>
+                </a>
+            </div>
+            <!-- Expanded Assign Action -->
+            <div class="col-12 mt-2">
+                <a th:href="@{/my-tasks}" class="card quick-action-card border-0 text-center text-decoration-none p-3 h-100" style="background: rgba(79, 70, 229, 0.05); border: 1px dashed rgba(79, 70, 229, 0.4) !important; transition: all 0.2s;">
+                    <i class="bi bi-person-plus-fill text-primary fs-3 mb-2 d-block"></i>
+                    <span class="text-primary small fw-bold">Assign Tasks</span>
                 </a>
             </div>
         </div>

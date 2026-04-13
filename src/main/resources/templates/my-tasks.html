@@ -64,13 +64,13 @@
             bottom: 2rem;
             left: 50%;
             transform: translate(-50%, 150%);
-            background: rgba(15, 23, 42, 0.95);
+            background: var(--bg-glass);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
             padding: 1rem 2rem;
             border-radius: 50px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
             z-index: 1050;
             display: flex;
             align-items: center;
@@ -88,8 +88,8 @@
         /* Filters Bar */
         .filter-btn {
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #94a3b8;
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
             padding: 0.5rem 1rem;
             border-radius: 50px;
             font-weight: 500;
@@ -97,39 +97,15 @@
             transition: all 0.2s;
         }
         .filter-btn:hover {
-            color: white;
-            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--text-main);
+            border-color: var(--text-muted);
         }
         .filter-btn.active {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--primary-color);
             color: white;
             border-color: transparent;
         }
 
-        /* Custom Scrollbar for Modal/Drawer */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        /* Modal Styles */
-        .glass-modal .modal-content {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: 1.5rem;
-        }
-        .glass-modal .btn-close {
-            filter: invert(1) grayscale(100%) brightness(200%);
-        }
-        
         /* Skeleton Animation */
         @keyframes shine {
             to {
@@ -285,24 +261,74 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal-body custom-scrollbar text-primary  pt-4 pb-5">
+                    <div class="modal-body custom-scrollbar text-primary pt-4 pb-5">
+                        <!-- Progress Section -->
+                        <div class="mb-4">
+                            <h6 class="text-uppercase small fw-bold mb-2" style="letter-spacing: 0.05em;">Overall Progress</h6>
+                            <div class="progress bg-dark" style="height: 10px; border-radius: 5px;">
+                                <div id="detailProgressBar" class="progress-bar bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small id="detailProgressText" class="text-muted mt-1 d-block text-end">0% Completed</small>
+                        </div>
+
                         <h6 class="text-uppercase small fw-bold mb-2 " style="letter-spacing: 0.05em;">Description</h6>
                         <p id="detailDescription" class="mb-4" style="line-height: 1.6;">Full task description goes here.</p>
                         
+                        <!-- Milestones Section -->
+                        <div class="mb-4">
+                            <h6 class="text-uppercase small fw-bold mb-3 d-flex justify-content-between align-items-center" style="letter-spacing: 0.05em;">
+                                Milestones
+                                <span class="badge bg-secondary rounded-pill" id="milestoneCount">0</span>
+                            </h6>
+                            <div class="input-group mb-3">
+                                <input type="text" id="newMilestoneInput" class="form-control form-control-sm bg-transparent text-primary border-secondary" placeholder="Add a milestone...">
+                                <button class="btn btn-outline-primary btn-sm" type="button" onclick="addMilestone()"><i class="bi bi-plus-lg"></i></button>
+                            </div>
+                            <div id="milestonesList" class="list-group list-group-flush bg-transparent">
+                                <!-- Milestones will be rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- Collaborators Section -->
+                        <div class="mb-4">
+                            <h6 class="text-uppercase small fw-bold mb-3 d-flex justify-content-between align-items-center" style="letter-spacing: 0.05em;">
+                                Collaborators
+                                <i class="bi bi-people ms-auto"></i>
+                            </h6>
+                            <div id="collaboratorInputSection" class="input-group mb-3 d-none">
+                                <input type="text" id="newCollaboratorInput" class="form-control form-control-sm bg-transparent text-primary border-secondary" placeholder="Invite by username...">
+                                <button class="btn btn-outline-primary btn-sm" type="button" onclick="sendInvite()"><i class="bi bi-person-plus"></i> Invite</button>
+                            </div>
+                            <div id="collaboratorsList" class="d-flex flex-wrap gap-2 mb-3">
+                                <!-- Collaborators will be rendered here -->
+                            </div>
+                            <div id="pendingInvitesSection" class="d-none">
+                                <h6 class="text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.1em; margin-bottom: 0.75rem;">Pending Invitations</h6>
+                                <div id="pendingInvitesList" class="d-flex flex-wrap gap-2">
+                                    <!-- Pending invites will be rendered here -->
+                                </div>
+                            </div>
+                        </div>
+
                         <h6 class="text-uppercase small fw-bold mb-2 " style="letter-spacing: 0.05em;">Created On</h6>
-                        <p id="detailCreated" class="mb-0"><i class="bi bi-clock me-1"></i> Oct 24, 2023</p>
+                        <p id="detailCreated" class="mb-0 text-muted small"><i class="bi bi-clock me-1"></i> Oct 24, 2023</p>
                     </div>
                     <div class="modal-footer border-top border-light border-opacity-10 py-3 px-4 d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="deleteCurrentTask()">
-                            <i class="bi bi-trash me-1"></i> Delete
-                        </button>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="editCurrentTask()">
-                                <i class="bi bi-pencil me-1"></i> Edit
+                        <div id="ownerActions" class="d-contents">
+                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="deleteCurrentTask()" id="modalDeleteBtn">
+                                <i class="bi bi-trash me-1"></i> Delete
                             </button>
-                            <button type="button" class="btn btn-success btn-sm rounded-pill px-3" id="btnDetailsComplete" onclick="toggleCurrentTaskComplete()">
-                                <i class="bi bi-check2"></i> Mark Complete
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="editCurrentTask()" id="modalEditBtn">
+                                    <i class="bi bi-pencil me-1"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-indigo btn-sm rounded-pill px-3" onclick="openAssignmentModalFromDetails()" id="modalAssignBtn">
+                                    <i class="bi bi-person-plus"></i> Assign
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm rounded-pill px-3" id="btnDetailsComplete" onclick="toggleCurrentTaskComplete()">
+                                    <i class="bi bi-check2"></i> Mark Complete
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -361,7 +387,8 @@
             let searchQuery = '';
             let selectedTasks = new Set();
             let editingTaskId = null;
-            let viewingTaskId = null;
+            let currentTaskOwner = null;
+            const currentAuthUser = "[[${currentUsername}]]";
 
             // Live Data Fetching
             let mockTasks = [];
@@ -384,6 +411,16 @@
                             if (dueDateObj < today) status = 'overdue';
                         }
                         
+                        
+                        // Calculate progress
+                        let progress = 0;
+                        if (t.milestones && t.milestones.length > 0) {
+                            const completedMilestones = t.milestones.filter(m => m.completed).length;
+                            progress = Math.round((completedMilestones / t.milestones.length) * 100);
+                        } else {
+                            progress = t.completed ? 100 : 0;
+                        }
+
                         return {
                             id: t.id,
                             title: t.title,
@@ -391,7 +428,10 @@
                             dueDate: due,
                             priority: t.priority || 'Medium',
                             status: status,
-                            createdDate: t.createdAt ? t.createdAt.split('T')[0] : ''
+                            createdDate: t.createdAt ? t.createdAt.split('T')[0] : '',
+                            progress: progress,
+                            username: t.username,
+                            collaborators: t.collaborators || []
                         };
                     });
                     
@@ -557,7 +597,12 @@
                             </td>
                             <td onclick="openDetails(${task.id})">
                                 <h6 class="mb-1 text-primary fw-semibold text-truncate ${lineThrough}">${task.title}</h6>
-                                <p class="text-muted small mb-0 text-truncate ${lineThrough}" style="max-width: 90%;">${task.description}</p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress bg-dark flex-grow-1" style="height: 4px; max-width: 100px;">
+                                        <div class="progress-bar bg-primary" style="width: ${task.progress}%"></div>
+                                    </div>
+                                    <span class="text-muted small" style="font-size: 0.7rem;">${task.progress}%</span>
+                                </div>
                             </td>
                             <td onclick="openDetails(${task.id})"><span class="badge rounded-pill fw-normal px-2 py-1 ${prioClass}">${task.priority}</span></td>
                             <td onclick="openDetails(${task.id})">
@@ -567,8 +612,16 @@
                             </td>
                             <td onclick="openDetails(${task.id})"><span class="badge rounded-pill fw-normal px-2 ${statusObj.cls}"><i class="bi ${statusObj.icon} me-1"></i> ${task.status}</span></td>
                             <td class="text-end pe-4" onclick="event.stopPropagation()">
-                                <button class="btn btn-link text-muted p-1 border-0" onclick="editTask(${task.id})"><i class="bi bi-pencil transition-hover"></i></button>
-                                <button class="btn btn-link text-muted p-1 border-0" onclick="deleteTask(${task.id})"><i class="bi bi-trash transition-hover" style="color: #ef4444;"></i></button>
+                                ${task.username && task.username.toLowerCase().trim() === currentAuthUser ? `
+                                    <button class="btn btn-link text-indigo p-1 border-0" title="Assign" 
+                                        onclick="openAssignmentModal(${task.id}, '${task.title.replace(/'/g, "\\'")}')">
+                                        <i class="bi bi-person-plus transition-hover"></i>
+                                    </button>
+                                    <button class="btn btn-link text-muted p-1 border-0" onclick="editTask(${task.id})"><i class="bi bi-pencil transition-hover"></i></button>
+                                    <button class="btn btn-link text-muted p-1 border-0" onclick="deleteTask(${task.id})"><i class="bi bi-trash transition-hover" style="color: #ef4444;"></i></button>
+                                ` : `
+                                    <span class="badge bg-secondary bg-opacity-10 text-muted fw-normal" style="font-size: 0.7rem;" title="Owned by: ${task.username}">Collaborator</span>
+                                `}
                             </td>
                         </tr>
                     `;
@@ -600,16 +653,34 @@
                                                 <i class="bi bi-three-dots"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-secondary">
-                                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="editTask(${task.id})"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                                ${task.username && task.username.toLowerCase().trim() === currentAuthUser ? `
+                                                    <li><a class="dropdown-item text-indigo" href="javascript:void(0)" 
+                                                        onclick="openAssignmentModal(${task.id}, '${task.title.replace(/'/g, "\\'")}')">
+                                                        <i class="bi bi-person-plus me-2"></i>Assign</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="editTask(${task.id})"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                                    <li><hr class="dropdown-divider border-secondary"></li>
+                                                    <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteTask(${task.id})"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                                                ` : `
+                                                    <li class="dropdown-header small">Read-only (Owner: ${task.username})</li>
+                                                `}
                                                 <li><a class="dropdown-item text-success" href="javascript:void(0)" onclick="toggleTaskComplete(${task.id})"><i class="bi bi-check2 me-2"></i>Mark ${task.status==='completed'?'Pending':'Complete'}</a></li>
-                                                <li><hr class="dropdown-divider border-secondary"></li>
-                                                <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteTask(${task.id})"><i class="bi bi-trash me-2"></i>Delete</a></li>
                                             </ul>
                                         </div>
                                     </div>
                                     
                                     <h5 class="fw-bold text-primary mb-2 ${lineThrough}">${task.title}</h5>
-                                    <p class="text-muted small mb-3 flex-grow-1 ${lineThrough}" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${task.description}</p>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted">Progress</small>
+                                            <small class="text-primary fw-bold">${task.progress}%</small>
+                                        </div>
+                                        <div class="progress bg-dark" style="height: 6px;">
+                                            <div class="progress-bar bg-primary" style="width: ${task.progress}%"></div>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-muted small mb-3 flex-grow-1 ${lineThrough}" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${task.description}</p>
                                     
                                     <div class="mt-auto pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -710,7 +781,199 @@
                     compBtn.innerHTML = '<i class="bi bi-check2"></i> Mark Complete';
                 }
 
+                // Show buttons only if owner
+                const isOwner = task.username && task.username.toLowerCase().trim() === currentAuthUser;
+                document.getElementById('modalDeleteBtn').classList.toggle('d-none', !isOwner);
+                document.getElementById('modalEditBtn').classList.toggle('d-none', !isOwner);
+                document.getElementById('modalAssignBtn').classList.toggle('d-none', !isOwner);
+                document.getElementById('collaboratorInputSection').classList.toggle('d-none', !isOwner);
+
                 detailsModal.show();
+            }
+
+            function openAssignmentModalFromDetails() {
+                detailsModal.hide();
+                openAssignmentModal(viewingTaskId, document.getElementById('detailTitle').innerText);
+            }
+
+            // --- Milestone Management ---
+            async function fetchMilestones(taskId) {
+                try {
+                    const response = await fetch(`/api/tasks/${taskId}/milestones`);
+                    const milestones = await response.json();
+                    renderMilestones(milestones);
+                    updateTaskProgressLocally(taskId, milestones);
+                } catch (e) { console.error(e); }
+            }
+
+            function renderMilestones(milestones) {
+                const list = document.getElementById('milestonesList');
+                const count = document.getElementById('milestoneCount');
+                count.innerText = milestones.length;
+                
+                if (milestones.length === 0) {
+                    list.innerHTML = '<p class="text-muted small ps-2">No milestones yet.</p>';
+                    return;
+                }
+
+                list.innerHTML = milestones.map(m => `
+                    <div class="list-group-item bg-transparent border-0 px-0 d-flex align-items-center gap-3">
+                        <input class="form-check-input custom-checkbox rounded" type="checkbox" ${m.completed ? 'checked' : ''} 
+                            onchange="toggleMilestone(${m.id})">
+                        <span class="${m.completed ? 'text-decoration-line-through text-muted' : 'text-primary'} flex-grow-1">${m.title}</span>
+                        <button class="btn btn-link text-muted p-0" onclick="deleteMilestone(${m.id})"><i class="bi bi-x-circle"></i></button>
+                    </div>
+                `).join('');
+            }
+
+            async function addMilestone() {
+                const input = document.getElementById('newMilestoneInput');
+                const title = input.value.trim();
+                if (!title) return;
+
+                try {
+                    await fetch(`/api/tasks/${viewingTaskId}/milestones`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: title, completed: false })
+                    });
+                    input.value = '';
+                    fetchMilestones(viewingTaskId); // Refresh list
+                    loadTasks(); // Update background
+                } catch (e) { console.error(e); }
+            }
+
+            async function toggleMilestone(milestoneId) {
+                try {
+                    await fetch(`/api/milestones/${milestoneId}/toggle`, { method: 'PATCH' });
+                    fetchMilestones(viewingTaskId);
+                    loadTasks();
+                } catch (e) { console.error(e); }
+            }
+
+            async function deleteMilestone(milestoneId) {
+                try {
+                    await fetch(`/api/milestones/${milestoneId}`, { method: 'DELETE' });
+                    fetchMilestones(viewingTaskId);
+                    loadTasks();
+                } catch (e) { console.error(e); }
+            }
+
+            function updateTaskProgressLocally(taskId, milestones) {
+                const progress = milestones.length > 0 
+                    ? Math.round((milestones.filter(m => m.completed).length / milestones.length) * 100)
+                    : (mockTasks.find(t => t.id === taskId)?.status === 'completed' ? 100 : 0);
+                
+                const pb = document.getElementById('detailProgressBar');
+                const pt = document.getElementById('detailProgressText');
+                pb.style.width = `${progress}%`;
+                pb.setAttribute('aria-valuenow', progress);
+                pt.innerText = `${progress}% Completed`;
+            }
+
+            // --- Collaborator Management ---
+            async function fetchCollaborators(taskId) {
+                try {
+                    const response = await fetch(`/api/tasks/${taskId}/collaborators`);
+                    const collaborators = await response.json();
+                    
+                    // Show input only if owner (mock check: assuming current user vs owner)
+                    // In real app, we'd get current user from a global session or endpoint
+                    document.getElementById('collaboratorInputSection').classList.remove('d-none');
+                    
+                    renderCollaborators(taskId, collaborators);
+                } catch (e) { console.error(e); }
+            }
+
+            function renderCollaborators(taskId, collaborators) {
+                const list = document.getElementById('collaboratorsList');
+                if (collaborators.length === 0) {
+                    list.innerHTML = '<p class="text-muted small w-100">No collaborators added.</p>';
+                    return;
+                }
+
+                list.innerHTML = collaborators.map(u => `
+                    <div class="badge bg-dark border border-secondary p-2 d-flex align-items-center gap-2 rounded-pill">
+                        <i class="bi bi-person-circle text-primary"></i>
+                        <span>${u.username}</span>
+                        ${task.username === currentTaskOwner ? `
+                        <button class="btn btn-link text-danger p-0 ms-1" style="font-size: 0.8rem;" onclick="removeCollaborator(${taskId}, ${u.id})">
+                            <i class="bi bi-x-lg"></i>
+                        </button>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            async function fetchPendingInvites(taskId) {
+                try {
+                    const response = await fetch(`/api/tasks/${taskId}/pending-invitations`);
+                    const invites = await response.json();
+                    renderPendingInvites(taskId, invites);
+                } catch (e) { console.error(e); }
+            }
+
+            function renderPendingInvites(taskId, invites) {
+                const section = document.getElementById('pendingInvitesSection');
+                const list = document.getElementById('pendingInvitesList');
+                
+                if (invites.length === 0) {
+                    section.classList.add('d-none');
+                    return;
+                }
+
+                section.classList.remove('d-none');
+                list.innerHTML = invites.map(inv => `
+                    <div class="badge bg-dark border border-secondary p-2 d-flex align-items-center gap-2 rounded-pill opacity-75">
+                        <i class="bi bi-person-clock text-muted"></i>
+                        <span>${inv.receiver.username}</span>
+                        <button class="btn btn-link text-muted p-0 ms-1" style="font-size: 0.8rem;" onclick="cancelInvite(${inv.id})">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            async function sendInvite() {
+                const input = document.getElementById('newCollaboratorInput');
+                const username = input.value.trim();
+                if (!username) return;
+
+                try {
+                    const response = await fetch(`/api/invitations/tasks/${viewingTaskId}/invite`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: username })
+                    });
+                    if (response.ok) {
+                        input.value = '';
+                        fetchPendingInvites(viewingTaskId);
+                        showToast("Invitation sent!");
+                    } else {
+                        const err = await response.json();
+                        showToast(err.message || "Error sending invitation.", "danger");
+                    }
+                } catch (e) { showToast("Network error.", "danger"); }
+            }
+
+            async function cancelInvite(invitationId) {
+                try {
+                    await fetch(`/api/invitations/${invitationId}`, { method: 'DELETE' });
+                    fetchPendingInvites(viewingTaskId);
+                } catch (e) { console.error(e); }
+            }
+
+            // Simple toast helper (check if exists, else console)
+            function showToast(msg, type = 'success') {
+                console.log(`[${type}] ${msg}`);
+                // If a toast system is in layout, use it. For now, alert or console.
+                if (window.showAppToast) window.showAppToast(msg, type);
+            }
+
+            async function removeCollaborator(taskId, userId) {
+                try {
+                    await fetch(`/api/tasks/${taskId}/collaborators/${userId}`, { method: 'DELETE' });
+                    fetchCollaborators(taskId);
+                } catch (e) { console.error(e); }
             }
 
             function deleteCurrentTask() {

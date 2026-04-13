@@ -1,0 +1,96 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <th:block th:fragment="collaboration-modal">
+        <!-- Collaboration / Assignment Modal -->
+        <div class="modal fade glass-modal" id="assignmentModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0">
+                    <div class="modal-header border-bottom border-light border-opacity-10 pb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
+                                <i class="bi bi-person-plus fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold text-primary mb-0">Manage Collaboration</h5>
+                                <p class="text-muted small mb-0" id="assignTaskTitle">Task Title</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body pt-4">
+                        <!-- Invite Section -->
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="letter-spacing: 0.05em;">Invite Collaborator</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-secondary border-end-0 text-muted">
+                                    <i class="bi bi-at"></i>
+                                </span>
+                                <input type="text" id="inviteUsernameInput" class="form-control bg-transparent text-primary border-secondary border-start-0 ps-0 shadow-none" placeholder="Enter username...">
+                                <button class="btn btn-primary px-3" type="button" onclick="handleSendInvite()">
+                                    <i class="bi bi-send-fill me-1"></i> Invite
+                                </button>
+                            </div>
+                            <div id="inviteFeedback" class="small mt-2 px-1"></div>
+                        </div>
+
+                        <!-- Collaborators List -->
+                        <div class="mb-4">
+                            <h6 class="text-uppercase small fw-bold text-muted mb-3 d-flex justify-content-between align-items-center" style="letter-spacing: 0.05em;">
+                                Active Collaborators
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill fw-normal" id="collabCount">0</span>
+                            </h6>
+                            <div id="collabList" class="d-flex flex-column gap-2">
+                                <!-- Rendered via JS -->
+                                <div class="text-center py-3 text-muted opacity-50 small">
+                                    <i class="bi bi-people mb-2 d-block fs-2"></i>
+                                    No collaborators yet
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Invitations -->
+                        <div id="pendingSection" class="d-none">
+                            <h6 class="text-uppercase small fw-bold text-muted mb-3 d-flex justify-content-between align-items-center" style="letter-spacing: 0.05em;">
+                                Pending Invites
+                                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill fw-normal" id="pendingCount">0</span>
+                            </h6>
+                            <div id="pendingList" class="d-flex flex-column gap-2">
+                                <!-- Rendered via JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-light border-opacity-10 py-3">
+                        <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .collab-item {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 0.75rem;
+                padding: 0.75rem 1rem;
+                transition: all 0.2s ease;
+            }
+            .collab-item:hover {
+                background: rgba(255, 255, 255, 0.06);
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+            .avatar-circle {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: var(--primary-color);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 0.8rem;
+            }
+        </style>
+    </th:block>
+</body>
+</html>

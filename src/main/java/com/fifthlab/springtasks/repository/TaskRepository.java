@@ -1,6 +1,6 @@
 package com.fifthlab.springtasks.repository;
 
-import com.fifthlab.springtasks.model.CategoryBreakdownDTO;
+import com.fifthlab.springtasks.dto.CategoryBreakdownDTO;
 import com.fifthlab.springtasks.model.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -30,15 +30,19 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("SELECT c.name as category, COUNT(t) as count FROM Task t, Category c WHERE t.categoryId = c.id AND t.username = :username GROUP BY c.name")
     List<CategoryBreakdownDTO> getCategoryBreakdownByUsername(@Param("username") String username);
 
-    // Filter methods
     List<Task> findByUsernameOrderByCreatedAtDesc(String username);
+
+    // Filter methods (Collaboration Aware)
+    @Query("SELECT t FROM Task t LEFT JOIN t.collaborators c WHERE t.username = :username OR c.username = :username ORDER BY t.createdAt DESC")
+    List<Task> findAllForUser(@Param("username") String username);
     
-    List<Task> findByUsernameAndCompletedOrderByCreatedAtDesc(String username, boolean completed);
+    @Query("SELECT t FROM Task t LEFT JOIN t.collaborators c WHERE (t.username = :username OR c.username = :username) AND t.completed = :completed ORDER BY t.createdAt DESC")
+    List<Task> findByCompletedForUser(@Param("username") String username, @Param("completed") boolean completed);
 
-    // Search methods
-    @Query("SELECT t FROM Task t WHERE t.username = :username AND (LOWER(t.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) ORDER BY t.createdAt DESC")
-    List<Task> searchByUsernameAndTerm(@Param("username") String username, @Param("searchTerm") String searchTerm);
+    // Search methods (Collaboration Aware)
+    @Query("SELECT t FROM Task t LEFT JOIN t.collaborators c WHERE (t.username = :username OR c.username = :username) AND (LOWER(t.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) ORDER BY t.createdAt DESC")
+    List<Task> searchForUser(@Param("username") String username, @Param("searchTerm") String searchTerm);
 
-    @Query("SELECT t FROM Task t WHERE t.username = :username AND t.completed = :completed AND (LOWER(t.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) ORDER BY t.createdAt DESC")
-    List<Task> searchByUsernameAndTermAndCompleted(@Param("username") String username, @Param("searchTerm") String searchTerm, @Param("completed") boolean completed);
+    @Query("SELECT t FROM Task t LEFT JOIN t.collaborators c WHERE (t.username = :username OR c.username = :username) AND t.completed = :completed AND (LOWER(t.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) ORDER BY t.createdAt DESC")
+    List<Task> searchForUserAndCompleted(@Param("username") String username, @Param("searchTerm") String searchTerm, @Param("completed") boolean completed);
 }

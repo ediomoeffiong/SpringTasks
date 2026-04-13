@@ -2,8 +2,8 @@ package com.fifthlab.springtasks.controller;
 
 import com.fifthlab.springtasks.model.Task;
 import com.fifthlab.springtasks.service.TaskService;
-import com.fifthlab.springtasks.service.DashboardService;
-import com.fifthlab.springtasks.model.DashboardResponseDTO;
+import com.fifthlab.springtasks.service.*;
+import com.fifthlab.springtasks.dto.DashboardResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

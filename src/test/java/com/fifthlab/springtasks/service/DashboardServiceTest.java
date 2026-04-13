@@ -1,8 +1,9 @@
 package com.fifthlab.springtasks.service;
 
-import com.fifthlab.springtasks.model.CategoryBreakdownDTO;
-import com.fifthlab.springtasks.model.DashboardResponseDTO;
+import com.fifthlab.springtasks.dto.*;
 import com.fifthlab.springtasks.model.Task;
+import com.fifthlab.springtasks.repository.TaskRepository;
+import com.fifthlab.springtasks.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,9 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.time.LocalDateTime;
 import java.util.List;
-import com.fifthlab.springtasks.repository.TaskRepository;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +25,9 @@ public class DashboardServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
+
+    @Mock
+    private NotificationRepository notificationRepository;
 
     @InjectMocks
     private DashboardService dashboardService;
@@ -66,6 +69,9 @@ public class DashboardServiceTest {
         };
         when(taskRepository.getCategoryBreakdownByUsername(testUser))
                 .thenReturn(List.of(breakdown));
+
+        when(notificationRepository.findByUsernameOrderByCreatedAtDesc(testUser))
+                .thenReturn(Collections.emptyList());
 
         // Act
         DashboardResponseDTO result = dashboardService.getDashboardData(testUser);
