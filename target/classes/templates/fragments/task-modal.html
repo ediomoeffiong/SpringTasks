@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="task-modal">
+        <!-- Unified Task Form Modal -->
+        <div class="modal fade glass-modal" id="taskFormModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-md">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header border-0 pb-0 pt-4 px-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                                <i class="bi bi-pencil-square text-primary fs-5" id="modalIconEdit"></i>
+                                <i class="bi bi-plus-circle text-primary fs-5 d-none" id="modalIconCreate"></i>
+                            </div>
+                            <h5 class="modal-title fw-bold text-primary-theme mb-0" id="formModalTitle">Edit Task</h5>
+                        </div>
+                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body custom-scrollbar p-4">
+                        <form id="taskForm">
+                            <input type="hidden" id="formTaskId">
+                            
+                            <div class="mb-4">
+                                <label class="form-label-custom"><i class="bi bi-type-h1 text-primary"></i> Task Title *</label>
+                                <input type="text" id="formTaskTitle" class="form-control form-control-custom form-control-lg" placeholder="What needs to be done?" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label-custom"><i class="bi bi-justify-left text-primary"></i> Description</label>
+                                <textarea id="formTaskDesc" class="form-control form-control-custom" rows="3" placeholder="Add some context..."></textarea>
+                            </div>
+                            
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label-custom"><i class="bi bi-tag text-primary"></i> Category</label>
+                                    <select id="formTaskCategory" class="form-select form-control-custom">
+                                        <option value="" class="text-dark">No Category</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom"><i class="bi bi-flag text-primary"></i> Priority</label>
+                                    <select id="formTaskPriority" class="form-select form-control-custom">
+                                        <option value="LOW" class="text-dark">Low</option>
+                                        <option value="MEDIUM" class="text-dark" selected>Medium</option>
+                                        <option value="HIGH" class="text-dark">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <label class="form-label-custom"><i class="bi bi-calendar-event text-primary"></i> Due Date (Optional)</label>
+                                <input type="datetime-local" id="formTaskDue" class="form-control form-control-custom">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="button" class="btn btn-link text-muted-theme text-decoration-none px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold shadow-sm" onclick="saveTask()">
+                            <i class="bi bi-save2 me-2"></i> Save Task
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

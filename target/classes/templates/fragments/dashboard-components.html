@@ -9,7 +9,7 @@
             <p class="text-muted mb-0" >Here's what's happening with your tasks today.</p>
         </div>
         <div>
-            <a th:href="@{/tasks/new}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm rounded-pill px-4 py-2 fw-semibold">
+            <a href="javascript:void(0)" onclick="openCreateModal()" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm rounded-pill px-4 py-2 fw-semibold">
                 <i class="bi bi-plus-lg fs-5"></i> Create Task
             </a>
         </div>
@@ -182,7 +182,7 @@
         <h6 class="fw-bold text-primary mb-3 text-uppercase px-2" style="letter-spacing: 0.05em; font-size: 0.85rem;">Quick Actions</h6>
         <div class="row g-3">
             <div class="col-6">
-                <a th:href="@{/tasks/new}" class="card quick-action-card border-0 text-center text-decoration-none p-3 h-100" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05) !important; transition: all 0.2s;">
+                <a href="javascript:void(0)" onclick="openCreateModal()" class="card quick-action-card border-0 text-center text-decoration-none p-3 h-100" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05) !important; transition: all 0.2s;">
                     <i class="bi bi-plus-square text-primary fs-3 mb-2 d-block"></i>
                     <span class="text-primary small fw-medium">New Task</span>
                 </a>

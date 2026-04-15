@@ -38,6 +38,7 @@ public class Task {
     private boolean completed;
     
     // New fields for dashboard and auth
+    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime dueDate;
     
     @Column(name = "categoryId")

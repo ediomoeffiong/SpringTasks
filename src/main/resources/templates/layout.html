@@ -24,8 +24,8 @@
             --bg-glass: rgba(30, 41, 59, 0.85);
             --bg-body: #0f172a;
             --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --card-border: rgba(255,255,255,0.05);
+            --text-muted: #cbd5e1; /* Brighter muted text for dark mode visibility */
+            --card-border: rgba(255,255,255,0.08);
         }
 
         /* Essential Typography */
@@ -434,11 +434,234 @@
     <!-- Render Toasts -->
     <div th:replace="~{fragments/toasts :: toasts}"></div>
 
-    <!-- Collaboration Modal -->
-    <div th:replace="~{fragments/collaboration-modal :: collaboration-modal}"></div>
+    <!-- Global Task Modal -->
+    <div th:replace="~{fragments/task-modal :: task-modal}"></div>
+
+    <!-- Global Logic -->
+    <script>
+        // --- Task Modal Centralized Logic ---
+        let editingTaskId = null;
+        let cachedCategories = null;
+        let taskFormModalInstance = null;
+
+        function getTaskFormModal() {
+            try {
+                if (!taskFormModalInstance) {
+                    const modalEl = document.getElementById('taskFormModal');
+                    if (modalEl && typeof bootstrap !== 'undefined') {
+                        taskFormModalInstance = new bootstrap.Modal(modalEl);
+                    }
+                }
+            } catch(e) { console.error("Modal init failed", e); }
+            return taskFormModalInstance;
+        }
+
+        async function loadTaskCategories() {
+            if (cachedCategories) return cachedCategories;
+            try {
+                const response = await fetch('/api/categories');
+                cachedCategories = await response.json();
+                const select = document.getElementById('formTaskCategory');
+                if (select) {
+                    select.innerHTML = '<option value="" class="text-dark">No Category</option>';
+                    cachedCategories.forEach(cat => {
+                        const opt = document.createElement('option');
+                        opt.value = cat.id; opt.textContent = cat.name; opt.className = 'text-dark';
+                        select.appendChild(opt);
+                    });
+                }
+                return cachedCategories;
+            } catch(e) { return []; }
+        }
+
+        async function openCreateModal() {
+            editingTaskId = null;
+            const form = document.getElementById('taskForm');
+            if (form) form.reset();
+            const titleEl = document.getElementById('formModalTitle');
+            if (titleEl) titleEl.innerText = "Create New Task";
+            const iconC = document.getElementById('modalIconCreate');
+            const iconE = document.getElementById('modalIconEdit');
+            if (iconC) iconC.classList.remove('d-none');
+            if (iconE) iconE.classList.add('d-none');
+            await loadTaskCategories();
+            const dueEl = document.getElementById('formTaskDue');
+            if (dueEl) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setMinutes(tomorrow.getMinutes() - tomorrow.getTimezoneOffset());
+                dueEl.value = tomorrow.toISOString().slice(0, 16);
+            }
+            const modal = getTaskFormModal();
+            if (modal) modal.show();
+        }
+
+        async function openEditModal(task) {
+            if (!task) return;
+            editingTaskId = task.id;
+            const titleEl = document.getElementById('formModalTitle');
+            if (titleEl) titleEl.innerText = "Update Task Details";
+            const iconC = document.getElementById('modalIconCreate');
+            const iconE = document.getElementById('modalIconEdit');
+            if (iconE) iconE.classList.remove('d-none');
+            if (iconC) iconC.classList.add('d-none');
+            await loadTaskCategories();
+            document.getElementById('formTaskId').value = task.id;
+            document.getElementById('formTaskTitle').value = task.title;
+            document.getElementById('formTaskDesc').value = task.description || '';
+            document.getElementById('formTaskCategory').value = task.categoryId || '';
+            const dueEl = document.getElementById('formTaskDue');
+            if (dueEl) dueEl.value = task.dueDate ? task.dueDate.slice(0, 16) : '';
+            document.getElementById('formTaskPriority').value = (task.priority || 'MEDIUM').toUpperCase();
+            const modal = getTaskFormModal();
+            if (modal) modal.show();
+        }
+
+        async function saveTask() {
+            const title = document.getElementById('formTaskTitle').value.trim();
+            if(!title) { 
+                if (window.showAppToast) window.showAppToast('Title is required!', 'danger');
+                else alert('Title is required!');
+                return; 
+            }
+            const payload = { 
+                title, 
+                description: document.getElementById('formTaskDesc').value.trim(), 
+                dueDate: document.getElementById('formTaskDue').value ? document.getElementById('formTaskDue').value + ":00" : null,
+                priority: document.getElementById('formTaskPriority').value,
+                categoryId: document.getElementById('formTaskCategory').value ? parseInt(document.getElementById('formTaskCategory').value) : null
+            };
+            try {
+                const method = editingTaskId ? 'PUT' : 'POST';
+                const url = editingTaskId ? `/api/tasks/${editingTaskId}` : `/api/tasks`;
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    const modal = getTaskFormModal(); if (modal) modal.hide();
+                    if (typeof window.refreshTaskList === 'function') await window.refreshTaskList();
+                    if (window.showAppToast) window.showAppToast(editingTaskId ? "Task updated!" : "Task created!");
+                }
+            } catch(e) { if (window.showAppToast) window.showAppToast("Failed to save task!", "danger"); }
+        }
+
+        // --- Collaboration Logic ---
+        let currentAssignmentTaskId = null;
+        let assignmentModalRef = null;
+
+        function getAssignmentModal() {
+            try {
+                if (!assignmentModalRef) {
+                    const modalEl = document.getElementById('assignmentModal');
+                    if (modalEl && typeof bootstrap !== 'undefined') assignmentModalRef = new bootstrap.Modal(modalEl);
+                }
+            } catch(e) { }
+            return assignmentModalRef;
+        }
+
+        async function openAssignmentModal(taskId, taskTitle) {
+            currentAssignmentTaskId = taskId;
+            document.getElementById('assignTaskTitle').innerText = taskTitle || `Task #${taskId}`;
+            document.getElementById('inviteUsernameInput').value = '';
+            document.getElementById('inviteFeedback').innerText = '';
+            const modal = getAssignmentModal(); if (modal) modal.show();
+            await refreshCollaborationUI();
+        }
+
+        async function refreshCollaborationUI() {
+            if (!currentAssignmentTaskId) return;
+            try {
+                const [collabRes, pendingRes] = await Promise.all([
+                    fetch(`/api/tasks/${currentAssignmentTaskId}/collaborators`),
+                    fetch(`/api/tasks/${currentAssignmentTaskId}/pending-invitations`)
+                ]);
+                if (collabRes.ok && pendingRes.ok) {
+                    const collaborators = await collabRes.json();
+                    const pendingInvites = await pendingRes.json();
+                    renderCollaboratorsUI(collaborators);
+                    renderPendingInvitesUI(pendingInvites);
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        function renderCollaboratorsUI(collaborators) {
+            const container = document.getElementById('collabList');
+            if (container) {
+                document.getElementById('collabCount').innerText = collaborators.length;
+                if (collaborators.length === 0) {
+                    container.innerHTML = '<div class="text-center py-3 text-muted opacity-50 small"><i class="bi bi-people mb-2 d-block fs-3"></i>No collaborators yet</div>';
+                } else {
+                    container.innerHTML = collaborators.map(u => `
+                        <div class="collab-item d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar-circle">${u.username.charAt(0).toUpperCase()}</div>
+                                <div class="text-primary fw-medium small">${u.username}</div>
+                            </div>
+                            <button class="btn btn-sm btn-link text-danger p-1" onclick="handleRemoveCollaborator(${u.id})"><i class="bi bi-person-x"></i></button>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function renderPendingInvitesUI(invites) {
+            const container = document.getElementById('pendingList');
+            const section = document.getElementById('pendingSection');
+            if (container && section) {
+                document.getElementById('pendingCount').innerText = invites.length;
+                if (invites.length === 0) { section.classList.add('d-none'); }
+                else {
+                    section.classList.remove('d-none');
+                    container.innerHTML = invites.map(i => `
+                        <div class="collab-item d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar-circle bg-warning text-warning">${i.receiver.username.charAt(0).toUpperCase()}</div>
+                                <div class="text-primary fw-medium small">${i.receiver.username}</div>
+                            </div>
+                            <button class="btn btn-sm btn-link text-muted p-1" onclick="handleCancelInvite(${i.id})"><i class="bi bi-x-circle"></i></button>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        async function handleSendInvite() {
+            const input = document.getElementById('inviteUsernameInput');
+            const username = input.value.trim();
+            const feedback = document.getElementById('inviteFeedback');
+            if (!username) return;
+            try {
+                const response = await fetch(`/api/invitations/tasks/${currentAssignmentTaskId}/invite`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username })
+                });
+                if (response.ok) {
+                    input.value = ''; feedback.innerText = 'Invitation sent!';
+                    await refreshCollaborationUI();
+                } else { feedback.innerText = 'Error sending invitation'; }
+            } catch (error) { feedback.innerText = 'System error'; }
+        }
+
+        async function handleCancelInvite(inviteId) {
+            if (!confirm('Cancel?')) return;
+            try {
+                const response = await fetch(`/api/invitations/${inviteId}`, { method: 'DELETE' });
+                if (response.ok) await refreshCollaborationUI();
+            } catch (error) { }
+        }
+
+        async function handleRemoveCollaborator(userId) {
+            if (!confirm('Remove?')) return;
+            try {
+                const response = await fetch(`/api/tasks/${currentAssignmentTaskId}/collaborators/${userId}`, { method: 'DELETE' });
+                if (response.ok) await refreshCollaborationUI();
+            } catch (error) { }
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/js/collaboration.js}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Sidebar Toggle
@@ -504,14 +727,22 @@
                     
                     showToggle(); // Keep visible when interacted with
                 });
+
+                // Show on load
+                showToggle();
             }
 
-            // Initialize Toasts
-            var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-            var toastList = toastElList.map(function(toastEl) {
-                return new bootstrap.Toast(toastEl, {autohide: true, delay: 5000})
-            });
-            toastList.forEach(toast => toast.show());
+            // Initialize Toasts with Safety
+            try {
+                var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                var toastList = toastElList.map(function(toastEl) {
+                    if (typeof bootstrap !== 'undefined') {
+                        return new bootstrap.Toast(toastEl, {autohide: true, delay: 5000})
+                    }
+                    return null;
+                });
+                toastList.forEach(toast => { if (toast) toast.show(); });
+            } catch(e) { console.error("Toast init failed", e); }
         });
     </script>
     <th:block layout:fragment="scripts"></th:block>

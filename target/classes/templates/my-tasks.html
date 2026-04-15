@@ -106,7 +106,12 @@
             border-color: transparent;
         }
 
-        /* Skeleton Animation */
+        #searchInput::placeholder {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        /* Skeleton Loading UI */
         @keyframes shine {
             to {
                 background-position-x: -200%;
@@ -117,6 +122,42 @@
             background-size: 200% 100%;
             animation: 1.5s shine linear infinite;
             border-radius: 0.5rem;
+        /* Unified Modern Form Styles */
+        .form-control-custom {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid var(--card-border) !important;
+            color: var(--text-main) !important;
+            border-radius: 1rem !important;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.3s ease;
+        }
+        .form-control-custom:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+        .form-label-custom {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        [data-theme='dark'] .form-control-custom {
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+        [data-theme='dark'] .form-control-custom[type="datetime-local"] {
+            color-scheme: dark;
+        }
+        .modal-glass {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 2rem;
         }
     </style>
 </head>
@@ -128,16 +169,16 @@
         <div class="workspace-header mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4">
             <div>
                 <h2 class="fw-bold mb-2 text-primary"><i class="bi bi-stack me-2"></i>My Tasks</h2>
-                <p class="text-muted mb-0" >Manage, organize, and track all your tasks in one unified workspace.</p>
+                <p class="text-muted-theme mb-0">Manage, organize, and track all your tasks in one unified workspace.</p>
             </div>
             <div class="d-flex align-items-center gap-3 w-100 w-md-auto">
                 <div class="input-group" style="max-width: 300px;">
                     <span class="input-group-text bg-transparent border-0 text-muted ps-3 position-absolute z-3" style="top: 50%; transform: translateY(-50%);">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" id="searchInput" class="form-control rounded-pill ps-5 py-2 text-primary" 
+                    <input type="text" id="searchInput" class="form-control rounded-pill ps-5 py-2 text-primary-theme" 
                            placeholder="Search tasks..." 
-                           style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                           style="background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);">
                 </div>
                 <button class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap" onclick="openCreateModal()">
                     <i class="bi bi-plus-lg me-1"></i> New Task
@@ -146,16 +187,16 @@
         </div>
 
         <!-- 2. Filters & Controls Bar -->
-        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-start align-items-xl-center gap-3 mb-4 p-3 glass-card">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-4 mb-4 p-3 px-4 glass-card">
             
-            <div class="d-flex flex-wrap align-items-center gap-2" id="filterContainer">
+            <div class="d-flex flex-wrap align-items-center gap-3" id="filterContainer">
                 <button class="filter-btn active" data-filter="all">All Tasks</button>
                 <button class="filter-btn" data-filter="pending">Pending</button>
                 <button class="filter-btn" data-filter="completed">Completed</button>
-                <button class="filter-btn" data-filter="overdue">Overdue <span class="badge bg-danger rounded-pill ms-1">2</span></button>
+                <button class="filter-btn" data-filter="overdue">Overdue <span class="badge bg-danger rounded-pill ms-1" id="overdueBadge">0</span></button>
             </div>
 
-            <div class="d-flex align-items-center gap-3 ms-auto w-100 w-xl-auto">
+            <div class="d-flex align-items-center gap-3 w-auto">
                 <div class="d-flex align-items-center gap-2">
                     <label class="text-muted small mb-0 text-nowrap">Sort by:</label>
                     <select id="sortSelect" class="form-select form-select-sm bg-transparent text-primary border-secondary rounded-pill shadow-none" style="min-width: 140px;">
@@ -165,7 +206,7 @@
                     </select>
                 </div>
                 
-                <div class="btn-group bg-dark rounded-pill p-1" style="border: 1px solid rgba(255,255,255,0.1);">
+                <div class="btn-group rounded-pill p-1" style="background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);">
                     <button class="btn btn-sm text-primary px-3 rounded-pill active-view" id="btnListView" onclick="setViewMode('list')" style="background: rgba(255,255,255,0.1);">
                         <i class="bi bi-list-ul"></i>
                     </button>
@@ -209,8 +250,8 @@
         <!-- Empty State -->
         <div id="emptyState" class="text-center py-5 d-none glass-card">
             <i class="bi bi-inbox-fill text-muted display-1  mb-3"></i>
-            <h4 class="text-primary">No tasks found</h4>
-            <p class="text-muted">You haven't created any tasks that match these filters.</p>
+            <h4 class="text-primary-theme">No tasks found</h4>
+            <p class="text-muted-theme">You haven't created any tasks that match these filters.</p>
             <button class="btn btn-primary rounded-pill mt-2 px-4" onclick="openCreateModal()">Create Task</button>
         </div>
 
@@ -218,10 +259,10 @@
         <div id="paginationContainer" class="d-flex justify-content-center mt-4 d-none">
             <nav aria-label="Task pagination">
                 <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item disabled"><a class="page-link bg-transparent border-secondary text-muted rounded-start-pill" href="#">Previous</a></li>
+                    <li class="page-item disabled"><a class="page-link bg-transparent border-secondary text-muted-theme rounded-start-pill" href="#">Previous</a></li>
                     <li class="page-item active"><a class="page-link border-primary bg-primary text-white" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link bg-transparent border-secondary text-primary" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link bg-transparent border-secondary text-primary rounded-end-pill" href="#">Next</a></li>
+                    <li class="page-item"><a class="page-link bg-transparent border-secondary text-primary-theme" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link bg-transparent border-secondary text-primary-theme rounded-end-pill" href="#">Next</a></li>
                 </ul>
             </nav>
         </div>
@@ -335,48 +376,7 @@
             </div>
         </div>
 
-        <!-- 7. Task Form Modal (Create / Edit) -->
-        <div class="modal fade glass-modal" id="taskFormModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content text-start border-0">
-                    <div class="modal-header border-bottom border-light border-opacity-10">
-                        <h5 class="modal-title fw-bold text-primary" id="formModalTitle">Create New Task</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body custom-scrollbar pt-4 text-primary">
-                        <form id="taskForm">
-                            <input type="hidden" id="formTaskId">
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Title *</label>
-                                <input type="text" id="formTaskTitle" class="form-control form-control-lg bg-transparent text-primary border-secondary shadow-none" placeholder="What needs to be done?" required>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Description</label>
-                                <textarea id="formTaskDesc" class="form-control bg-transparent text-primary border-secondary shadow-none" rows="3" placeholder="Add additional details..."></textarea>
-                            </div>
-                            <div class="row g-3 mb-2">
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted small fw-bold">Due Date</label>
-                                    <input type="date" id="formTaskDue" class="form-control bg-transparent text-primary border-secondary shadow-none color-scheme-dark">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted small fw-bold">Priority</label>
-                                    <select id="formTaskPriority" class="form-select bg-transparent text-primary border-secondary shadow-none">
-                                        <option value="Low" class="text-dark">Low</option>
-                                        <option value="Medium" class="text-dark" selected>Medium</option>
-                                        <option value="High" class="text-dark">High</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer border-top border-light border-opacity-10 py-3">
-                        <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="saveTask()">Save Task</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Global Modal will be injected via Layout -->
 
         <!-- MOCK DATA & APP LOGIC SCRIPT -->
         <script>
@@ -440,6 +440,7 @@
                     document.getElementById('paginationContainer').classList.remove('d-none');
                     
                     renderTasks();
+                    updateOverdueBadge();
                 } catch (error) {
                     console.error("Error loading tasks:", error);
                 }
@@ -447,13 +448,14 @@
 
             // Bootstrap Modals
             let detailsModal;
-            let formModal;
 
             // --- 1. Initialization ---
             document.addEventListener('DOMContentLoaded', () => {
                 // Initialize Bootstrap modals
                 detailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
-                formModal = new bootstrap.Modal(document.getElementById('taskFormModal'));
+                
+                // Allow global script to refresh this page
+                window.refreshTaskList = loadTasks;
 
                 // Fetch real data
                 loadTasks();
@@ -1026,65 +1028,18 @@
                 } catch(e) { console.error(e); }
             }
 
-            // FORM (CREATE/EDIT)
-            function openCreateModal() {
-                editingTaskId = null;
-                document.getElementById('taskForm').reset();
-                document.getElementById('formModalTitle').innerText = "Create New Task";
-                
-                // Defaults
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('formTaskDue').value = today;
-
-                formModal.show();
-            }
-
             function editTask(id) {
-                editingTaskId = id;
                 const task = mockTasks.find(t => t.id === id);
-                
-                document.getElementById('formModalTitle').innerText = "Edit Task";
-                document.getElementById('formTaskId').value = task.id;
-                document.getElementById('formTaskTitle').value = task.title;
-                document.getElementById('formTaskDesc').value = task.description;
-                document.getElementById('formTaskDue').value = task.dueDate;
-                document.getElementById('formTaskPriority').value = task.priority;
-
-                formModal.show();
+                if (task && typeof openEditModal === 'function') {
+                    openEditModal(task);
+                }
             }
 
-            async function saveTask() {
-                const title = document.getElementById('formTaskTitle').value.trim();
-                if(!title) {
-                    alert('Title is required!');
-                    return;
-                }
-
-                const desc = document.getElementById('formTaskDesc').value.trim();
-                const due = document.getElementById('formTaskDue').value;
-                const prio = document.getElementById('formTaskPriority').value;
-
-                const payload = { title, description: desc, dueDate: due, priority: prio };
-
-                try {
-                    if (editingTaskId) {
-                        await fetch(`/api/tasks/${editingTaskId}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                    } else {
-                        await fetch(`/api/tasks`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                    }
-                    formModal.hide();
-                    await loadTasks();
-                } catch(e) {
-                    console.error(e);
-                    alert("Failed to save task!");
+            function updateOverdueBadge() {
+                const overdueCount = mockTasks.filter(t => t.status === 'overdue').length;
+                const badge = document.getElementById('overdueBadge');
+                if (badge) {
+                    badge.innerText = overdueCount;
                 }
             }
         </script>
