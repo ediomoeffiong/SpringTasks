@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.lang.NonNull;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +24,6 @@ public class TaskRestController {
 
     @GetMapping
     public ResponseEntity<List<Task>> getAllTasks() {
-        // Find by status null delegates to fetching all user tasks in current setup
         return ResponseEntity.ok(taskService.findByStatusAndSearch(null, null));
     }
 
@@ -59,14 +60,26 @@ public class TaskRestController {
         if (payload.containsKey("description")) {
             task.setDescription((String) payload.get("description"));
         }
-        // Instead of strict mapping, using generic map helps handle "YYYY-MM-DD"
         if (payload.containsKey("dueDate")) {
             String dueStr = (String) payload.get("dueDate");
             if (dueStr != null && !dueStr.trim().isEmpty()) {
-                if (dueStr.length() == 10) {
-                    task.setDueDate(LocalDate.parse(dueStr).atStartOfDay());
-                } else {
-                    task.setDueDate(LocalDateTime.parse(dueStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                dueStr = dueStr.trim();
+                try {
+                    if (dueStr.length() == 10) {
+                        task.setDueDate(LocalDate.parse(dueStr).atStartOfDay());
+                    } else if (dueStr.endsWith("Z")) {
+                        task.setDueDate(Instant.parse(dueStr).atZone(ZoneId.systemDefault()).toLocalDateTime());
+                    } else if (dueStr.contains("+") || (dueStr.lastIndexOf('-') > 10)) {
+                        task.setDueDate(java.time.OffsetDateTime.parse(dueStr).toLocalDateTime());
+                    } else {
+                        task.setDueDate(LocalDateTime.parse(dueStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    }
+                } catch (Exception e) {
+                    try {
+                        task.setDueDate(LocalDateTime.parse(dueStr.substring(0, Math.min(dueStr.length(), 19))));
+                    } catch (Exception ignored) {
+                        task.setDueDate(null);
+                    }
                 }
             } else {
                 task.setDueDate(null);

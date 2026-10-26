@@ -6,6 +6,7 @@ com\fifthlab\springtasks\service\AnalyticsService.class
 com\fifthlab\springtasks\repository\NotificationRepository.class
 com\fifthlab\springtasks\dto\ActivityDTO$ActivityDTOBuilder.class
 com\fifthlab\springtasks\service\CategoryService.class
+com\fifthlab\springtasks\config\DataSourceConfig.class
 com\fifthlab\springtasks\exception\UserAlreadyExistsException.class
 com\fifthlab\springtasks\config\JpaConfig.class
 com\fifthlab\springtasks\model\Task.class
